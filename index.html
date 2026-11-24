@@ -5,105 +5,198 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Digital Front Door prototype</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* VOICE: calm, plain-language public-sector form; nothing competes with the task
-   IDEA: the AI Foundry Figma wireframes D1-D4 / M1-M3, made real and clickable
+/* VOICE: calm, plain-language university service form; nothing competes with the task
+   IDEA: an LSBU web form: deep purple masthead, raspberry pill buttons, yellow ring accents, as on lsbu.ac.uk
    PICTURE: the form itself, one 720px column, top of the page
-   COLOUR and TYPE: colours exactly as the A1 WCAG 2.2 AA spec (slate ink, #1D4ED8 blue, #B91C1C error, #B45309 amber); Inter
-   LAYOUT: header, persistent governance notice, form card; stacks with 16px gutters under 600px */
-:root{color-scheme:light;--ink:#0F172A;--hint:#475569;--line:#64748B;--soft:#E2E8F0;--page:#F8FAFC;--blue:#1D4ED8;--blue-d:#1E3A8A;--err:#B91C1C;--err-bg:#FEF2F2;--amb:#B45309;--amb-ink:#78350F;--amb-bg:#FFFBEB;--ok:#166534}
+   COLOUR and TYPE: LSBU purple #3A2658, raspberry #B62E5F, violet #55488F, blue #0964AF, yellow #F3C148; Outfit standing in for Gilroy; all pairs WCAG 2.2 AA
+   LAYOUT: purple header, violet governance band, white form card on lavender ground; stacks with 16px gutters under 600px */
+:root{color-scheme:light;--ink:#1E1430;--pur:#3A2658;--vio:#55488F;--rasp:#B62E5F;--rasp-d:#962449;--blue:#0964AF;--yel:#F3C148;--hint:#5B5470;--line:#8A84A0;--soft:#E4DFEC;--lav:#F3F0F7;--page:#F6F4F9;--err:#B91C1C;--err-bg:#FEF2F2;--warn-bg:#FFF7E0;--ok:#166534}
 *{box-sizing:border-box;min-width:0}
 html{scroll-padding-top:120px}
-body{margin:0;background:var(--page);color:var(--ink);font:16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:clip}
+body{margin:0;background:var(--page);color:var(--ink);font:17px/1.55 Outfit,"Helvetica Neue",system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:clip}
 :focus-visible{outline:3px solid var(--blue);outline-offset:3px;box-shadow:0 0 0 3px #fff}
-.skip{position:absolute;left:16px;top:-100px;background:#fff;color:var(--blue);padding:12px 16px;font-weight:600;z-index:20;border:2px solid var(--blue);border-radius:6px}
+.skip{position:absolute;left:16px;top:-100px;background:#fff;color:var(--pur);padding:12px 16px;font-weight:600;z-index:20;border:2px solid var(--pur);border-radius:999px}
 .skip:focus{top:12px}
-header.site{background:#fff;border-bottom:1px solid var(--soft);padding:12px max(32px,calc((100% - 1376px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.logo{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-weight:700;font-size:17px;min-height:44px}
-.mark{width:32px;height:32px;border-radius:7px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700}
-.site small{color:var(--hint);font-size:14px}
-.notice{position:sticky;top:0;z-index:10;background:#EFF6FF;border-bottom:1px solid #BFDBFE;color:var(--blue-d);padding:12px max(32px,calc((100% - 1376px)/2));display:flex;gap:12px;align-items:flex-start;font-size:15px}
-.notice .i{flex:none;width:24px;height:24px;border-radius:50%;background:var(--blue-d);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
-main{padding:32px 16px 96px}main:focus{outline:none}
-.card{max-width:720px;margin:0 auto;background:#fff;border:1px solid var(--soft);border-radius:12px;padding:32px}
-h1{font-size:28px;line-height:1.2;margin:0 0 8px;text-wrap:balance}
-h2{font-size:20px;line-height:1.3;margin:0 0 8px}
-.lead{color:var(--hint);margin:0 0 4px}
-.meta{color:var(--hint);font-size:14px;margin:0 0 24px}
-.field{margin:0 0 24px;padding:0}
+header.site{background:var(--pur);color:#fff;padding:14px max(32px,calc((100% - 1376px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none;font-weight:700;font-size:20px;min-height:44px;letter-spacing:-.01em}
+.logo:focus-visible{outline-color:var(--yel);box-shadow:none}
+.mark{width:38px;height:38px;border-radius:50%;border:2px solid var(--yel);color:#fff;display:grid;place-items:center;font-size:14px;font-weight:700}
+.uni{display:flex;flex-direction:column;line-height:1.15;font-size:15px;color:#fff;text-align:right}
+.uni span:last-child{color:#D9D2E6;font-size:14px}
+.notice{position:sticky;top:0;z-index:10;background:var(--vio);color:#fff;padding:12px max(32px,calc((100% - 1376px)/2));display:flex;gap:12px;align-items:flex-start;font-size:15px}
+.notice .i{flex:none;width:24px;height:24px;border-radius:50%;background:var(--yel);color:var(--pur);display:grid;place-items:center;font-weight:700;font-size:14px}
+main{padding:40px 16px 96px}main:focus{outline:none}
+.card{max-width:720px;margin:0 auto;background:#fff;border-radius:16px;padding:36px;box-shadow:0 1px 2px rgba(58,38,88,.06),0 8px 28px rgba(58,38,88,.08)}
+h1{font-size:34px;line-height:1.1;margin:0 0 10px;color:var(--pur);font-weight:700;letter-spacing:-.015em;text-wrap:balance}
+h2{font-size:21px;line-height:1.3;margin:0 0 8px;color:var(--pur)}
+.lead{color:var(--hint);margin:0 0 4px;font-size:18px}
+.meta{color:var(--hint);font-size:15px;margin:0 0 28px}
+.field{margin:0 0 26px;padding:0}
 .field.has-err{border-left:4px solid var(--err);padding-left:14px;margin-left:-18px}
-label,.legend{display:block;font-weight:600;margin-bottom:2px}
-.hint{display:block;color:var(--hint);font-size:14px;margin-bottom:8px}
-input[type=text],input[type=number],select,textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:6px;padding:10px 12px;min-height:44px}
+label,.legend{display:block;font-weight:600;margin-bottom:2px;color:var(--ink)}
+.hint{display:block;color:var(--hint);font-size:15px;margin-bottom:8px}
+input[type=text],input[type=number],select,textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;min-height:48px}
+input:hover,select:hover,textarea:hover{border-color:var(--vio)}
 textarea{min-height:112px;resize:vertical}
-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23475569' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%233A2658' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:42px}
 ::placeholder{color:var(--line)}
-input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--blue);outline-offset:0;box-shadow:0 0 0 6px #fff}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--blue);outline-offset:0;box-shadow:0 0 0 6px #fff;border-color:var(--blue)}
 [aria-invalid=true]{border:2px solid var(--err)!important}
-.err{display:flex;gap:6px;align-items:flex-start;color:var(--err);background:var(--err-bg);font-size:14px;font-weight:600;padding:6px 10px;border-radius:4px;margin-top:8px}
+.err{display:flex;gap:6px;align-items:flex-start;color:var(--err);background:var(--err-bg);font-size:15px;font-weight:600;padding:6px 12px;border-radius:8px;margin-top:8px}
 .err[hidden]{display:none}
 .row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
-fieldset{border:0;margin:0 0 24px;padding:0}
+fieldset{border:0;margin:0 0 26px;padding:0}
 legend{padding:0}
-.switch-row{display:flex;justify-content:space-between;align-items:center;gap:16px;border:1px solid var(--soft);border-radius:8px;padding:12px 14px;margin-top:12px;cursor:pointer}
-.switch-row.on{border-color:var(--amb)}
-.switch-row .t{font-weight:600}.switch-row .d{color:var(--hint);font-size:14px}
-.sw{flex:none;display:inline-flex;align-items:center;gap:8px;min-width:76px;min-height:44px;padding:0 6px 0 12px;border:2px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);font:600 14px Inter,sans-serif;cursor:pointer;justify-content:space-between}
-.sw .k{width:24px;height:24px;border-radius:50%;background:var(--line)}
-.sw[aria-checked=true]{background:var(--amb);border-color:var(--amb);color:#fff;flex-direction:row-reverse;padding:0 12px 0 6px}
-.sw[aria-checked=true] .k{background:#fff}
-.alert{border:2px solid var(--amb);border-left-width:6px;background:var(--amb-bg);color:var(--amb-ink);border-radius:6px;padding:12px 14px;margin-top:12px;font-size:15px}
-.alert strong{display:block;font-size:16px}
-.summary{border:3px solid var(--err);background:var(--err-bg);border-radius:8px;padding:16px 18px;margin:0 0 28px}
-.summary h2{color:var(--err);font-size:19px}
+.radios{display:grid;gap:8px}
+.radio{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--soft);border-radius:12px;padding:12px 14px;cursor:pointer;font-weight:400;margin:0}
+.radio:hover{border-color:var(--vio)}
+.radio:has(input:checked){border-color:var(--pur);background:var(--lav)}
+.radio input{flex:none;width:22px;height:22px;margin:1px 0 0;accent-color:var(--pur)}
+.radio .t{display:block;font-weight:600}.radio .d{display:block;color:var(--hint);font-size:15px}
+.tag{font-size:12px;font-weight:600;color:var(--pur);background:var(--yel);border-radius:999px;padding:3px 10px;letter-spacing:.01em}
+.switch-row{display:flex;justify-content:space-between;align-items:center;gap:16px;border:1.5px solid var(--soft);border-radius:12px;padding:12px 14px;margin-top:12px;cursor:pointer}
+.switch-row:hover{border-color:var(--vio)}
+.switch-row.on{border-color:var(--pur);background:var(--lav)}
+.switch-row .t{font-weight:600}.switch-row .d{color:var(--hint);font-size:15px}
+.sw{flex:none;display:inline-flex;align-items:center;gap:8px;min-width:80px;min-height:44px;padding:0 6px 0 12px;border:2px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);font:600 15px Outfit,sans-serif;cursor:pointer;justify-content:space-between}
+.sw .k{width:26px;height:26px;border-radius:50%;background:var(--line)}
+.sw[aria-checked=true]{background:var(--pur);border-color:var(--pur);color:#fff;flex-direction:row-reverse;padding:0 12px 0 6px}
+.sw[aria-checked=true] .k{background:var(--yel)}
+.alert{border:2px solid var(--yel);border-left-width:8px;background:var(--warn-bg);color:var(--pur);border-radius:10px;padding:12px 16px;margin-top:12px;font-size:16px}
+.alert strong{display:block;font-size:17px}
+.summary{border:3px solid var(--err);background:var(--err-bg);border-radius:12px;padding:16px 20px;margin:0 0 28px}
+.summary h2{color:var(--err);font-size:20px}
 .summary p{margin:0 0 6px}
 .summary ul{margin:0;padding-left:20px}
 .summary a{color:var(--blue);font-weight:600;text-underline-offset:3px}
 .actions{display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px}
-.btn{font:600 16px Inter,sans-serif;min-height:44px;padding:10px 20px;border-radius:6px;cursor:pointer;border:2px solid var(--blue);text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
-.primary{background:var(--blue);color:#fff}.primary:hover{background:var(--blue-d);border-color:var(--blue-d)}
-.secondary{background:#fff;color:var(--blue)}.secondary:hover{background:#EFF6FF}
+.btn{font:600 17px Outfit,sans-serif;min-height:48px;padding:10px 26px;border-radius:999px;cursor:pointer;border:2px solid var(--rasp);text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.primary{background:var(--rasp);color:#fff}.primary:hover{background:var(--rasp-d);border-color:var(--rasp-d)}
+.secondary{background:#fff;color:var(--pur);border-color:var(--pur)}.secondary:hover{background:var(--lav)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .done{text-align:center}
-.tick{width:56px;height:56px;border-radius:50%;background:#DCFCE7;color:var(--ok);display:grid;place-items:center;margin:0 auto 12px;font-size:28px;font-weight:700}
-.ref{font-size:clamp(32px,8vw,44px);font-weight:700;letter-spacing:.02em;margin:4px 0}
-dl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);margin:24px 0;border:1px solid var(--soft);border-radius:8px;text-align:left}
+.tick{width:68px;height:68px;border-radius:50%;border:3px solid var(--yel);color:var(--pur);display:grid;place-items:center;margin:0 auto 14px;font-size:30px;font-weight:700}
+.ref{font-size:clamp(32px,8vw,46px);font-weight:700;letter-spacing:.01em;margin:4px 0;color:var(--rasp)}
+dl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);margin:24px 0;border:1.5px solid var(--soft);border-radius:12px;text-align:left}
 dt,dd{margin:0;padding:10px 14px;border-top:1px solid var(--soft)}
 dt{color:var(--hint)}dd{font-weight:600;overflow-wrap:anywhere}
 dt:first-of-type,dd:first-of-type{border-top:0}
-.next{background:#EFF6FF;color:var(--blue-d);border-radius:8px;padding:14px 16px;text-align:left;margin-bottom:24px}
+.next{background:var(--lav);color:var(--pur);border-radius:12px;padding:14px 18px;text-align:left;margin-bottom:24px}
 .done .actions{justify-content:center}
 table{width:100%;border-collapse:collapse;margin-top:16px}
 th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--soft);vertical-align:top}
 th{font-size:14px;color:var(--hint);font-weight:600}
-.pill{display:inline-block;background:#EFF6FF;color:var(--blue-d);border-radius:999px;padding:2px 10px;font-size:14px;font-weight:600;white-space:nowrap}
+.pill{display:inline-block;background:var(--lav);color:var(--pur);border:1.5px solid var(--vio);border-radius:999px;padding:2px 12px;font-size:14px;font-weight:600;white-space:nowrap}
 .empty{color:var(--hint);padding:24px 0}
-.save-err{color:var(--err);background:var(--err-bg);border:2px solid var(--err);border-radius:6px;padding:10px 14px;font-weight:600;margin:0 0 20px}.save-err[hidden]{display:none}
+.save-err{color:var(--err);background:var(--err-bg);border:2px solid var(--err);border-radius:10px;padding:10px 14px;font-weight:600;margin:0 0 20px}.save-err[hidden]{display:none}
 .mode{color:var(--hint);font-size:14px;margin:16px 0 0;text-align:right}
-.saved{font-size:14px;font-weight:600;color:var(--ok);margin:0}.saved.warn{color:var(--amb-ink)}
+.saved{font-size:15px;font-weight:600;color:var(--ok);margin:0}.saved.warn{color:var(--rasp-d)}
 .btn[disabled]{opacity:.7;cursor:progress}
 .status-msg{color:var(--ok);font-weight:600;margin:0 0 16px}.status-msg:empty{margin:0}
-details.proto{position:fixed;right:16px;bottom:16px;z-index:15;background:#0F172A;color:#fff;border-radius:10px;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(15,23,42,.25)}
-details.proto summary{cursor:pointer;padding:12px 16px;font-weight:600;font-size:14px;min-height:44px;list-style-position:inside}
-details.proto summary:focus-visible{outline-color:#93C5FD}
+.build-note{max-width:720px;margin:28px auto 0;color:var(--hint);font-size:15px;border-top:1.5px solid var(--soft);padding-top:18px}
+.build-note h2{font-size:16px;margin:0 0 4px}
+.build-note p{margin:0 0 8px}
+details.proto{position:fixed;right:16px;bottom:16px;z-index:15;background:var(--pur);color:#fff;border-radius:14px;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(58,38,88,.3)}
+details.proto summary{cursor:pointer;padding:12px 18px;font-weight:600;font-size:15px;min-height:44px;list-style-position:inside}
+details.proto summary:focus-visible{outline-color:var(--yel)}
 .proto .in{padding:0 16px 14px;display:flex;flex-wrap:wrap;gap:8px;max-width:420px}
-.proto p{margin:0 0 4px;width:100%;font-size:13px;color:#CBD5E1}
-.proto button{font:600 14px Inter,sans-serif;background:#1E293B;color:#fff;border:1px solid #475569;border-radius:6px;padding:8px 12px;min-height:40px;cursor:pointer}
-.proto button:hover{background:#334155}
-.proto button:focus-visible{outline:3px solid #93C5FD}
+.proto p{margin:0 0 4px;width:100%;font-size:14px;color:#D9D2E6}
+.proto button{font:600 14px Outfit,sans-serif;background:var(--vio);color:#fff;border:1px solid #8C80C4;border-radius:999px;padding:8px 14px;min-height:40px;cursor:pointer}
+.proto button:hover{background:#6A5DA6}
+.proto button:focus-visible{outline:3px solid var(--yel)}
+[hidden]{display:none!important}
+.hright{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.role{display:flex;align-items:center;gap:10px;color:#fff;font-size:15px;font-weight:600}
+.role label{margin:0;color:#fff;font-weight:600}
+#role{width:auto;min-height:44px;border:2px solid var(--yel);background-color:#fff;color:var(--pur);border-radius:999px;font-weight:600;padding:6px 40px 6px 16px}
+input[type=search]{width:100%;font:inherit;font-size:16px;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:10px 18px;min-height:48px}
+input[type=search]:focus-visible{outline:3px solid var(--blue);outline-offset:0;border-color:var(--blue)}
+.board{max-width:1376px;margin:0 auto}
+@media(min-width:601px){main{padding-left:32px;padding-right:32px}}
+.board-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.board-head .lead{max-width:62ch}
+.tools{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) auto auto;gap:12px;align-items:center;margin-bottom:12px}
+.tools select{border-radius:999px}
+.chk{display:flex;gap:8px;align-items:center;font-weight:500;margin:0;min-height:44px;cursor:pointer;white-space:nowrap}
+.chk input{width:20px;height:20px;accent-color:var(--pur)}
+.count{margin:0;color:var(--hint);font-size:15px;white-space:nowrap}
+.pipe-msg{margin:0 0 12px;font-weight:600;color:var(--rasp-d)}.pipe-msg:empty{display:none}
+.kanban{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,1fr);gap:14px;overflow-x:auto;padding-bottom:12px;scroll-snap-type:x proximity}
+.kcol{background:#ECE7F3;border-radius:16px;padding:12px;min-height:220px;scroll-snap-align:start}
+.kcol h2{display:flex;justify-content:space-between;align-items:center;font-size:16px;margin:2px 4px 12px}
+.kcol h2 span{background:#fff;color:var(--pur);border-radius:999px;font-size:13px;min-width:28px;text-align:center;padding:2px 8px}
+.klist{display:grid;gap:10px}
+.k-empty{color:var(--hint);font-size:14px;margin:8px 4px}
+.kcard{background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 1px 2px rgba(58,38,88,.08);border:1.5px solid transparent}
+.kcard:hover{border-color:var(--vio)}
+.k-meta{margin:0;color:var(--hint);font-size:13px}
+.kcard h3{margin:2px 0 8px;font-size:17px;line-height:1.3}
+.k-open{all:unset;cursor:pointer;color:var(--pur);font-weight:600}
+.k-open:hover{text-decoration:underline;text-underline-offset:3px}
+.k-open:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:4px}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}.badges:empty{display:none}
+.badge{font-size:13px;font-weight:600;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.badge.flag{background:#FFF1C7;color:var(--pur);border:1.5px solid var(--yel)}
+.badge.hold{background:#FDEEF3;color:var(--rasp-d);border:1.5px solid var(--rasp)}
+.badge.ok{background:#E8F5EC;color:var(--ok);border:1.5px solid #6FB585}
+.badge.park{background:#EEE;color:#3F3F46;border:1.5px solid #A1A1AA}
+.k-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.k-val{font-size:14px;color:var(--ok);font-weight:600;white-space:nowrap}
+.tierpill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:13px;font-weight:600;white-space:nowrap}
+.t-High{background:var(--pur);color:#fff}.t-Medium{background:var(--vio);color:#fff}.t-Low{background:var(--lav);color:var(--pur);border:1.5px solid var(--vio)}
+.t-none{background:#fff;color:var(--hint);border:1.5px dashed var(--line)}
+.k-act{display:flex;justify-content:space-between;gap:8px;margin-top:10px;border-top:1px solid var(--soft);padding-top:8px}
+.mini{font:600 14px Outfit,sans-serif;min-height:40px;padding:6px 14px;border-radius:999px;border:1.5px solid var(--pur);background:#fff;color:var(--pur);cursor:pointer}
+.mini:hover{background:var(--lav)}
+.mini.fwd{margin-left:auto}
+dialog.drawer{position:fixed;inset:0 0 0 auto;margin:0;height:100%;max-height:100%;width:min(580px,100%);max-width:100%;border:0;padding:0;background:#fff;color:var(--ink);box-shadow:-12px 0 40px rgba(30,20,48,.25);overflow-y:auto}
+dialog.drawer::backdrop{background:rgba(30,20,48,.45)}
+.d-head{position:sticky;top:0;z-index:2;background:var(--pur);color:#fff;padding:18px 64px 16px 24px}
+.d-head h2{color:#fff;font-size:24px;margin:2px 0 10px}
+.d-meta{margin:0;color:#D9D2E6;font-size:14px}
+.d-head .badge.park,.d-head .badge.flag,.d-head .badge.hold,.d-head .badge.ok{border-width:0}
+.x{position:absolute;top:14px;right:14px;width:44px;height:44px;border-radius:50%;border:2px solid var(--yel);background:transparent;color:#fff;font:600 22px Outfit,sans-serif;cursor:pointer}
+.x:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.d-body{padding:4px 24px 24px}
+.d-body section{border-bottom:1.5px solid var(--soft);padding:18px 0}
+.d-body section:last-child{border-bottom:0}
+.d-body h3{font-size:18px;color:var(--pur);margin:0 0 6px}
+.d-body dl{margin:8px 0 0}
+.d-msg{position:sticky;bottom:0;margin:0;background:var(--pur);color:#fff;padding:12px 24px;font-weight:600}.d-msg:empty{display:none}
+.crit{margin:14px 0 0}
+.crit-top{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.crit-top output{color:var(--rasp);font-size:18px;min-width:1.5em;text-align:right}
+.crit input[type=range]{width:100%;height:32px;accent-color:var(--pur);margin:2px 0 0;cursor:pointer}
+.crit .hint{margin:0}
+.prio{font-size:26px;font-weight:700;color:var(--rasp);margin:16px 0 10px}
+.prio small{font-size:15px;color:var(--hint);font-weight:500}
+.actions.left{justify-content:flex-start}
+details.park{margin-top:14px;border:1.5px solid var(--soft);border-radius:12px;padding:0 14px}
+details.park summary{cursor:pointer;font-weight:600;color:var(--pur);min-height:44px;display:flex;align-items:center}
+details.park[open]{padding-bottom:14px}
+.inline-radios{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 12px}
+.inline-radios .radio{padding:8px 14px}
+.history{list-style:none;margin:8px 0 0;padding:0 0 0 16px;border-left:2px solid var(--yel)}
+.history li{margin:0 0 10px}
+.history time{display:block;color:var(--hint);font-size:13px}
+@media(max-width:900px){.tools{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
 @media(max-width:600px){
   header.site,.notice{padding-left:16px;padding-right:16px}
-  main{padding:20px 16px 96px}
-  .card{padding:20px 16px;border-radius:10px}
+  main{padding:20px 16px 24px}
+  .card{padding:22px 16px;border-radius:12px}
+  h1{font-size:28px}
   .row{grid-template-columns:minmax(0,1fr);gap:0}
   .actions{flex-direction:column;align-items:stretch}
   .field.has-err{padding-left:10px;margin-left:-14px}
   dl{grid-template-columns:minmax(0,1fr)}dd{border-top:0;padding-top:0}
-  .site small{display:none}
+  .uni{display:none}
+  .tools{grid-template-columns:minmax(0,1fr)}
+  .kanban{grid-auto-columns:minmax(78vw,1fr)}
+  .d-head{padding:16px 60px 14px 16px}.d-body{padding:4px 16px 20px}
   .mode{text-align:left}
   details.proto{position:static;margin:0 16px 24px;max-width:none}
-  main{padding-bottom:24px}
 }
 @media(prefers-reduced-motion:no-preference){.alert,.summary{animation:in .2s ease-out}@keyframes in{from{opacity:0;transform:translateY(-4px)}}}
 </style>
@@ -111,8 +204,14 @@ details.proto summary:focus-visible{outline-color:#93C5FD}
 <body>
 <a class="skip" href="#main">Skip to main content</a>
 <header class="site">
-  <a class="logo" href="#main" id="home"><span class="mark" aria-hidden="true">AI</span>AI Foundry</a>
-  <small>Digital Front Door · London South Bank University</small>
+  <a class="logo" href="#main" id="home"><span class="mark" aria-hidden="true">AI</span>AI Foundry <span class="tag">UX prototype</span></a>
+  <div class="hright">
+    <div class="role" id="role-wrap" hidden>
+      <label for="role">Viewing as</label>
+      <select id="role"><option value="requester">Requester</option><option value="dpm">Digital Project Manager</option></select>
+    </div>
+    <span class="uni"><span id="uni-sub">Digital Front Door</span><span>London South Bank University</span></span>
+  </div>
 </header>
 <div class="notice" role="note" aria-label="Governance notice">
   <span class="i" aria-hidden="true">i</span>
@@ -125,7 +224,7 @@ details.proto summary:focus-visible{outline-color:#93C5FD}
     <form id="form" novalidate>
       <h1 id="h-form">Submit an opportunity</h1>
       <p class="lead">Tell us about a manual or spreadsheet task that AI could make easier. No technical knowledge needed.</p>
-      <p class="meta">It takes about 3 minutes. Every question is required, apart from the data switches.</p>
+      <p class="meta">It takes under 5 minutes. Every question is required. The data switches start at No.</p>
       <p class="status-msg" id="status" role="status" aria-live="polite"></p>
       <p class="save-err" id="save-err" role="alert" hidden></p>
 
@@ -143,22 +242,60 @@ details.proto summary:focus-visible{outline-color:#93C5FD}
       </div>
 
       <div class="field" data-f="dept">
-        <label for="dept">Department</label>
+        <label for="dept">Department or directorate</label>
         <span class="hint" id="dept-hint">The team the work happens in.</span>
         <select id="dept" name="dept" aria-describedby="dept-hint dept-err">
           <option value="">Select…</option>
-          <option>Estates and Facilities</option><option>Finance</option><option>Human Resources</option><option>IT Services</option>
-          <option>Library and Learning Resources</option><option>Marketing and Recruitment</option><option>Student Services</option>
-          <option>A school or academic department</option><option>Other</option>
+          <optgroup label="Professional services">
+            <option>Estates and Facilities</option><option>Finance</option><option>Human Resources</option>
+            <option>IT Services</option><option>Legal Services</option><option>Procurement</option><option>Registry</option>
+            <option>Library and Learning Resources</option><option>Marketing and Recruitment</option><option>Student Services</option>
+          </optgroup>
+          <optgroup label="Academic">
+            <option>Academic school or institute</option><option>Research and enterprise</option>
+          </optgroup>
+          <optgroup label="Other">
+            <option>Other</option>
+          </optgroup>
         </select>
         <p class="err" id="dept-err" hidden></p>
       </div>
 
+      <div class="field" data-f="owner">
+        <label for="owner">Business owner</label>
+        <span class="hint" id="owner-hint">The named person who is responsible for this process and can approve changes to it. Use a test name.</span>
+        <input type="text" id="owner" name="owner" maxlength="80" autocomplete="off" placeholder="e.g. Test User (Head of Room Bookings)" aria-describedby="owner-hint owner-err">
+        <p class="err" id="owner-err" hidden></p>
+      </div>
+
+      <fieldset aria-describedby="ws-hint">
+        <legend class="legend">How is this request coming in?</legend>
+        <span class="hint" id="ws-hint">Most people submit one request on their own.</span>
+        <div class="radios">
+          <label class="radio"><input type="radio" name="ws" value="WS1" checked><span><span class="t">Single staff request</span><span class="d">Workstream 1</span></span></label>
+          <label class="radio"><input type="radio" name="ws" value="WS2"><span><span class="t">From a hackathon workshop</span><span class="d">Workstream 2: one of the 5 to 6 ideas from a departmental workshop</span></span></label>
+        </div>
+      </fieldset>
+
       <div class="field" data-f="process">
         <label for="process">Current process description</label>
-        <span class="hint" id="process-hint">What do you do today, step by step? Mention any spreadsheets involved.</span>
+        <span class="hint" id="process-hint">What do you do today, step by step?</span>
         <textarea id="process" name="process" placeholder="Describe the current process…" aria-describedby="process-hint process-err"></textarea>
         <p class="err" id="process-err" hidden></p>
+      </div>
+
+      <div class="field" data-f="tools">
+        <label for="tools">Current tools used</label>
+        <span class="hint" id="tools-hint">The software or systems the process relies on today.</span>
+        <input type="text" id="tools" name="tools" maxlength="200" autocomplete="off" placeholder="e.g. Excel, Outlook, SharePoint, paper forms" aria-describedby="tools-hint tools-err">
+        <p class="err" id="tools-err" hidden></p>
+      </div>
+
+      <div class="field" data-f="pain">
+        <label for="pain">Pain points</label>
+        <span class="hint" id="pain-hint">What goes wrong, takes too long or causes frustration?</span>
+        <textarea id="pain" name="pain" placeholder="e.g. Copying data by hand leads to typos and missed bookings…" aria-describedby="pain-hint pain-err"></textarea>
+        <p class="err" id="pain-err" hidden></p>
       </div>
 
       <div class="row">
@@ -174,9 +311,11 @@ details.proto summary:focus-visible{outline-color:#93C5FD}
           <select id="benefit" name="benefit" aria-describedby="benefit-hint benefit-err">
             <option value="">Select…</option>
             <option value="Efficiency">Save staff time (Efficiency)</option>
+            <option value="Financial">Save money or reduce costs (Financial)</option>
             <option value="Service">Better service for students or staff (Service)</option>
-            <option value="Risk">Fewer errors or less risk (Risk)</option>
+            <option value="Risk Reduction">Fewer errors or less risk (Risk Reduction)</option>
             <option value="Data">Better data or reporting (Data)</option>
+            <option value="Strategic">Supports university strategy (Strategic)</option>
           </select>
           <p class="err" id="benefit-err" hidden></p>
         </div>
@@ -194,6 +333,7 @@ details.proto summary:focus-visible{outline-color:#93C5FD}
           <div><div class="t" id="fin-l">Financial data</div><div class="d" id="fin-d">Payments, budgets, invoices or other money-related records.</div></div>
           <button type="button" class="sw" id="fin" role="switch" aria-checked="false" aria-labelledby="fin-l" aria-describedby="fin-d"><span class="v">No</span><span class="k" aria-hidden="true"></span></button>
         </div>
+        <div id="fin-alert-slot" aria-live="polite"></div>
       </fieldset>
 
       <div class="actions" id="actions">
@@ -213,7 +353,7 @@ details.proto summary:focus-visible{outline-color:#93C5FD}
     <p class="meta">Keep this number. Quote it if you contact the AI Foundry team.</p>
     <p class="saved" id="saved-note"></p>
     <dl id="recap"></dl>
-    <div class="next"><strong>What happens next</strong><br>The Digital Project Manager will review and score your request, then move it into the pipeline. You can follow its status in My requests.</div>
+    <div class="next"><strong>What happens next</strong><br>Your request is now at <strong>New Requests</strong>. The Digital Project Manager will review and score it, then move it into the pipeline. You can follow its status in My requests.<span id="dpia-note"></span></div>
     <div class="actions">
       <button type="button" class="btn primary" id="track">Track my requests</button>
       <button type="button" class="btn secondary" id="another">Submit another request</button>
@@ -227,18 +367,105 @@ details.proto summary:focus-visible{outline-color:#93C5FD}
     <div id="mine"></div>
     <div class="actions"><button type="button" class="btn primary" id="new-from-mine">Submit a new request</button></div>
   </section>
+
+  <!-- DIGITAL PM VIEW (FR3, FR4, NFR3, NFR5) -->
+  <section class="board" id="view-pipe" aria-labelledby="h-pipe" hidden>
+    <div class="board-head">
+      <div>
+        <h1 id="h-pipe" tabindex="-1">Opportunity pipeline</h1>
+        <p class="lead">Score new requests, clear data protection checks and move work through delivery. Only the Digital Project Manager and authorised staff see this view.</p>
+      </div>
+      <button type="button" class="btn secondary" id="refresh">Refresh</button>
+    </div>
+    <div class="tools">
+      <div><label class="sr" for="q">Search requests</label><input type="search" id="q" placeholder="Search title, reference or department" autocomplete="off"></div>
+      <div><label class="sr" for="cat">Benefit category</label>
+        <select id="cat"><option value="">All benefit categories</option><option>Efficiency</option><option>Financial</option><option>Service</option><option>Risk Reduction</option><option>Data</option><option>Strategic</option></select></div>
+      <label class="chk"><input type="checkbox" id="flagged"> Data flags only</label>
+      <p class="count" id="count" aria-live="polite"></p>
+    </div>
+    <p class="pipe-msg" id="pipe-msg" role="status" aria-live="polite"></p>
+    <div class="kanban" id="kanban"></div>
+    <p class="mode" id="pipe-mode"></p>
+  </section>
+
+  <aside class="build-note" aria-labelledby="bn-h">
+    <h2 id="bn-h">About this page</h2>
+    <p>This is the <strong>UX/UI prototype and design reference</strong> for the Digital Front Door. It shows the screens, wording, validation and data alerts the team agreed. It is not the live service.</p>
+    <p>Use <strong>Viewing as</strong> in the header to switch between the Requester journey and the Digital Project Manager workspace (NFR3). On the saved version, only the page owner and Editors get the Digital Project Manager view. The five requests marked as sample data are synthetic.</p>
+    <p>The live build runs inside LSBU's standard Microsoft 365 tenant (NFR1): a Power Apps canvas app writing to the Opportunity_Intake SharePoint list, with Power Automate sending receipts and status alerts. Requester name and email come from Microsoft Entra ID sign-in, so the form does not ask for them.</p>
+  </aside>
 </main>
+
+<dialog class="drawer" id="drawer" aria-labelledby="d-title">
+  <div class="d-head">
+    <p class="d-meta" id="d-meta"></p>
+    <h2 id="d-title"></h2>
+    <div class="badges" id="d-badges"></div>
+    <button type="button" class="x" id="d-close" aria-label="Close request details">×</button>
+  </div>
+  <div class="d-body">
+    <section aria-labelledby="dr-h"><h3 id="dr-h">Request</h3><dl id="d-details"></dl></section>
+    <section aria-labelledby="dt-h">
+      <h3 id="dt-h">Triage scores</h3>
+      <p class="hint">Score each PID criterion from 1 to 5. Complexity and resource requirement lower the priority.</p>
+      <div id="sliders"></div>
+      <p class="prio" id="prio" aria-live="polite"></p>
+      <button type="button" class="btn primary" id="save-scores">Save triage scores</button>
+      <p class="hint" style="margin-top:12px">How the score works: Strategic alignment 30%, Benefit potential 25%, Speed to value 15%, Complexity 15% and Resource requirement 15% (the last two inverted), giving 0 to 100. High is 75 or more, Medium 50 to 74, Low below 50. These are the team's proposed default weights; under FR7 an administrator can change them.</p>
+    </section>
+    <section aria-labelledby="dd-h">
+      <h3 id="dd-h">DPIA check</h3>
+      <p id="dpia-text"></p>
+      <button type="button" class="btn secondary" id="dpia-approve">Record DPIA approval</button>
+    </section>
+    <section aria-labelledby="dm-h">
+      <h3 id="dm-h">Move this request</h3>
+      <p id="move-text"></p>
+      <div class="actions left">
+        <button type="button" class="btn secondary" id="d-back"></button>
+        <button type="button" class="btn primary" id="d-next"></button>
+      </div>
+      <details class="park" id="park">
+        <summary>Defer or reject</summary>
+        <fieldset style="margin:0">
+          <legend class="legend">Decision</legend>
+          <div class="inline-radios">
+            <label class="radio"><input type="radio" name="park" value="Deferred" checked><span class="t">Defer</span></label>
+            <label class="radio"><input type="radio" name="park" value="Rejected"><span class="t">Reject</span></label>
+          </div>
+        </fieldset>
+        <div class="field" style="margin-bottom:12px">
+          <label for="rationale">Reason for the decision</label>
+          <span class="hint" id="rationale-hint">The requester will see this. Keep it plain and specific.</span>
+          <textarea id="rationale" aria-describedby="rationale-hint rationale-err" style="min-height:88px"></textarea>
+          <p class="err" id="rationale-err" hidden></p>
+        </div>
+        <button type="button" class="btn secondary" id="d-park">Confirm decision</button>
+      </details>
+    </section>
+    <section aria-labelledby="dh-h">
+      <h3 id="dh-h">History</h3>
+      <p class="hint">Every change records who made it and when, in UTC (NFR5).</p>
+      <ol class="history" id="history"></ol>
+    </section>
+  </div>
+  <p class="d-msg" id="d-msg" role="status" aria-live="polite"></p>
+</dialog>
 
 <details class="proto">
   <summary>Prototype states</summary>
   <div class="in">
-    <p>For reviewers. Jump to each wireframe state (D1–D4, M1–M3).</p>
+    <p>For reviewers. Jump to each screen state.</p>
     <button type="button" data-s="empty">Empty form</button>
     <button type="button" data-s="gdpr">GDPR on</button>
+    <button type="button" data-s="fin">Financial data on</button>
     <button type="button" data-s="errors">Validation errors</button>
     <button type="button" data-s="filled">Completed form</button>
     <button type="button" data-s="confirm">Confirmation</button>
     <button type="button" data-s="mine">My requests</button>
+    <button type="button" data-s="pipe" data-dpm hidden>DPM pipeline</button>
+    <button type="button" data-s="triage" data-dpm hidden>Triage panel</button>
   </div>
 </details>
 
@@ -248,18 +475,25 @@ const $ = id => document.getElementById(id);
 const form = $('form');
 const BASE_TITLE = 'Digital Front Door prototype';
 const TAB = 'tab-' + Math.random().toString(36).slice(2);
-const local = [];          // used when the page cannot save (downloaded copy, signed out, view-only)
-let localNext = 1;
+/* Synthetic sample requests (test data only), used in practice mode and seeded into the saved list */
+const SAMPLES = [{"ref": "AIF-2026-001", "num": 1, "title": "Automate invoice processing", "dept": "Finance", "owner": "Test Owner (Accounts Payable Lead)", "workstream": "WS1", "process": "Each week the team opens supplier PDF invoices, types the details into the finance system and checks each one against its purchase order by hand.", "tools": "Outlook, Adobe Acrobat, finance system", "pain": "Typing errors delay supplier payments, and month end regularly needs overtime.", "hours": 10, "benefit": "Efficiency", "gdpr": false, "fin": true, "status": "New Requests", "dpia": "Hold", "createdAt": "2026-10-20T09:12:00Z", "history": [{"at": "2026-10-20T09:12:00Z", "by": "sample", "what": "Submitted"}], "requester": "sample", "sample": true}, {"ref": "AIF-2026-002", "num": 2, "title": "Student admissions chatbot", "dept": "Student Services", "owner": "Test Owner (Admissions Manager)", "workstream": "WS2", "process": "Admissions staff answer the same applicant questions by email and phone, copying answers from a shared FAQ document.", "tools": "Outlook, Teams, shared Word FAQ", "pain": "In peak season replies take days and answers are inconsistent between staff.", "hours": 6, "benefit": "Service", "gdpr": false, "fin": false, "status": "In Delivery", "dpia": "Not required", "createdAt": "2026-10-02T11:30:00Z", "triage": {"sa": 4, "bp": 4, "sv": 3, "cx": 3, "rr": 2, "priority": 68, "tier": "Medium", "at": "2026-10-06T10:05:00Z", "by": "sample"}, "history": [{"at": "2026-10-02T11:30:00Z", "by": "sample", "what": "Submitted"}, {"at": "2026-10-06T10:05:00Z", "by": "sample", "what": "Triage scores saved: 68/100 (Medium)"}, {"at": "2026-10-06T10:06:00Z", "by": "sample", "what": "Moved to Triaged/Backlog"}, {"at": "2026-10-14T15:20:00Z", "by": "sample", "what": "Moved to In Delivery"}], "requester": "sample", "sample": true}, {"ref": "AIF-2026-003", "num": 3, "title": "Predictive maintenance for campus HVAC", "dept": "Estates and Facilities", "owner": "Test Owner (Building Services Manager)", "workstream": "WS1", "process": "Engineers log heating and cooling faults in a spreadsheet after they happen and plan repairs from it each Monday.", "tools": "Excel, building management system exports", "pain": "Breakdowns are found late, so rooms get too hot or cold before anyone knows.", "hours": 4, "benefit": "Risk Reduction", "gdpr": false, "fin": false, "status": "Triaged/Backlog", "dpia": "Not required", "createdAt": "2026-10-09T08:45:00Z", "triage": {"sa": 1, "bp": 3, "sv": 2, "cx": 2, "rr": 3, "priority": 35, "tier": "Low", "at": "2026-10-13T14:00:00Z", "by": "sample"}, "history": [{"at": "2026-10-09T08:45:00Z", "by": "sample", "what": "Submitted"}, {"at": "2026-10-13T14:00:00Z", "by": "sample", "what": "Triage scores saved: 35/100 (Low)"}, {"at": "2026-10-13T14:02:00Z", "by": "sample", "what": "Moved to Triaged/Backlog"}], "requester": "sample", "sample": true}, {"ref": "AIF-2026-004", "num": 4, "title": "Course reading list generator", "dept": "Library and Learning Resources", "owner": "Test Owner (Academic Liaison Librarian)", "workstream": "WS2", "process": "Librarians rebuild each module reading list by hand every term, checking every title against the catalogue.", "tools": "Excel, library catalogue, email", "pain": "Lists go out late and often include books the library does not hold.", "hours": 3, "benefit": "Data", "gdpr": false, "fin": false, "status": "Completed", "dpia": "Not required", "createdAt": "2026-09-15T13:10:00Z", "triage": {"sa": 5, "bp": 3, "sv": 4, "cx": 2, "rr": 1, "priority": 80, "tier": "High", "at": "2026-09-18T09:30:00Z", "by": "sample"}, "history": [{"at": "2026-09-15T13:10:00Z", "by": "sample", "what": "Submitted"}, {"at": "2026-09-18T09:30:00Z", "by": "sample", "what": "Triage scores saved: 80/100 (High)"}, {"at": "2026-09-18T09:31:00Z", "by": "sample", "what": "Moved to Triaged/Backlog"}, {"at": "2026-09-22T10:00:00Z", "by": "sample", "what": "Moved to In Delivery"}, {"at": "2026-11-10T16:45:00Z", "by": "sample", "what": "Moved to Completed"}], "requester": "sample", "sample": true}, {"ref": "AIF-2026-005", "num": 5, "title": "Replace HR starter checklist spreadsheet", "dept": "Human Resources", "owner": "Test Owner (HR Operations Lead)", "workstream": "WS1", "process": "For each new starter, HR copies a checklist spreadsheet, emails tasks to IT and the line manager, and chases each one by hand.", "tools": "Excel, Outlook", "pain": "Tasks get missed, so some new starters arrive without a laptop or system access.", "hours": 5, "benefit": "Efficiency", "gdpr": true, "fin": false, "status": "New Requests", "dpia": "Hold", "createdAt": "2026-11-03T10:20:00Z", "history": [{"at": "2026-11-03T10:20:00Z", "by": "sample", "what": "Submitted"}], "requester": "sample", "sample": true}];
+const clone = o => JSON.parse(JSON.stringify(o));
+const local = SAMPLES.map(clone);   // used when the page cannot save (downloaded copy, signed out, view-only)
+let localNext = SAMPLES.length + 1;
 let db = null, uid = null, canSave = false;
+let role = 'requester', canDPM = false;
 const touched = new Set();
-const refOf = n => 'AIF-' + String(n).padStart(3, '0');
+const refOf = n => 'AIF-' + new Date().getFullYear() + '-' + String(n).padStart(3, '0');   // FR2: AIF-2026-001
 const withTimeout = (p, ms = 10000) => Promise.race([p, new Promise((_, r) => setTimeout(() => r({ code: 'timeout' }), ms))]);
 
 const rules = {
   title: v => v.trim() ? '' : 'Enter a request title',
-  dept: v => v ? '' : 'Select your department',
+  dept: v => v ? '' : 'Select your department or directorate',
+  owner: v => v.trim() ? '' : 'Enter the name of the business owner',
   process: v => !v.trim() ? 'Describe the current process'
     : v.trim().length < 20 ? 'Describe the current process in a little more detail (at least 20 characters)' : '',
+  tools: v => v.trim() ? '' : 'Enter the tools used today, for example Excel or Outlook',
+  pain: v => v.trim() ? '' : 'Describe what goes wrong or takes too long today',
   hours: v => {
     if (v.trim() === '') return 'Enter staff hours saved per week, more than 0';
     const n = Number(v);
@@ -278,19 +512,25 @@ function setMode() {
     ? 'Submissions are saved and get a unique reference number.'
     : 'Practice mode: this copy cannot save submissions, so nothing leaves your browser.';
 }
+let decided = false;
 (async () => {
+  let u = null;
   try {
     if (window.claude && typeof window.claude.use === 'function') {
       db = await window.claude.use('db');
-      const u = await window.claude.use('user');
+      u = await window.claude.use('user');
       if (u) uid = await u.id();
       if (u && db) { const w = await u.can('data.write'); canSave = w !== false; }
       else canSave = !!db;
     }
   } catch (e) { db = null; canSave = false; }
-  setMode();
+  /* NFR3: with saving on, only the owner and Editors get the Digital PM view.
+     In practice mode the switch is open so reviewers can walk both journeys with sample data. */
+  try { canDPM = canSave ? !!(u && await u.canEdit()) : true; } catch (e) { canDPM = !canSave; }
+  decided = true;
+  setMode(); setRoleUI();
 })();
-setTimeout(() => { if ($('mode').textContent.startsWith('Checking')) setMode(); }, 11000);
+setTimeout(() => { if (!decided) { canDPM = !canSave; setMode(); setRoleUI(); } }, 11000);
 
 async function saveToDb(rec) {
   const col = db.collection('requests');
@@ -309,7 +549,7 @@ async function saveToDb(rec) {
 }
 function saveLocal(rec) {
   const ref = refOf(localNext++);
-  local.unshift({ ...rec, ref });
+  local.unshift({ ...rec, ref, num: localNext - 1 });
   return ref;
 }
 
@@ -357,16 +597,16 @@ function renderSummary(errs) {
 }
 
 /* ---------- Switches ---------- */
+const ALERTS = {
+  gdpr: '<div class="alert"><strong><span aria-hidden="true">⚠ </span>Personal data selected</strong>Do not type names, student numbers or any other details that identify a person. Describe the type of data instead, for example “student enrolment records”. This request will be held for a Data Protection Impact Assessment (DPIA) before it can be approved.</div>',
+  fin: '<div class="alert"><strong><span aria-hidden="true">⚠ </span>Financial data selected</strong>Do not type account numbers, card details, salaries or real budget figures. Describe the type of data instead, for example “supplier invoice records”. This request will be held for a Data Protection Impact Assessment (DPIA) and a Finance check before it can be approved.</div>'
+};
 function setSwitch(id, on) {
   const b = $(id);
   b.setAttribute('aria-checked', String(on));
   b.querySelector('.v').textContent = on ? 'Yes' : 'No';
   b.closest('.switch-row').classList.toggle('on', on);
-  if (id === 'gdpr') {
-    $('gdpr-alert-slot').innerHTML = on
-      ? '<div class="alert"><strong><span aria-hidden="true">⚠ </span>Personal data selected</strong>Do not type names, student numbers or any other details that identify a person. Describe the type of data instead, for example “student enrolment records”. The project manager will arrange a data protection check.</div>'
-      : '';
-  }
+  $(id + '-alert-slot').innerHTML = on ? ALERTS[id] : '';
 }
 for (const id of ['gdpr', 'fin']) {
   $(id).addEventListener('click', e => { e.stopPropagation(); setSwitch(id, $(id).getAttribute('aria-checked') !== 'true'); });
@@ -391,7 +631,7 @@ function resetForm(msg) {
   $('status').textContent = msg || '';
 }
 function show(view) {
-  for (const v of ['form', 'done', 'mine']) $('view-' + v).hidden = v !== view;
+  for (const v of ['form', 'done', 'mine', 'pipe']) $('view-' + v).hidden = v !== view;
   window.scrollTo(0, 0);
 }
 
@@ -410,16 +650,20 @@ async function submit(practice) {
     return;
   }
   const rec = {
-    title: $('title').value.trim(), dept: $('dept').value, process: $('process').value.trim(),
+    title: $('title').value.trim(), dept: $('dept').value, owner: $('owner').value.trim(),
+    workstream: form.elements.ws.value, process: $('process').value.trim(),
+    tools: $('tools').value.trim(), pain: $('pain').value.trim(),
     hours: Number($('hours').value), benefit: $('benefit').value, gdpr: isOn('gdpr'), fin: isOn('fin'),
-    status: 'New request', requester: uid || null, createdAt: new Date().toISOString()
+    status: 'New Requests', requester: uid || null, createdAt: new Date().toISOString()
   };
+  rec.dpia = rec.gdpr || rec.fin ? 'Hold' : 'Not required';
+  rec.history = [{ at: rec.createdAt, by: uid || 'practice', what: 'Submitted' }];
   let ref, note, warn = false;
   if (canSave && !practice) {
     busy = true; $('submit').disabled = true; $('submit').textContent = 'Submitting…';
     try {
       ref = await saveToDb(rec);
-      note = 'Saved. The Digital Project Manager can now see this request.';
+      note = 'Saved. The Digital Project Manager can now see this request in the pipeline.';
     } catch (e) {
       if (e && e.code === 'invalid_argument') {
         canSave = false; setMode();
@@ -448,10 +692,15 @@ function showConfirmation(ref, rec, note, warn) {
   $('ref').textContent = ref;
   $('saved-note').textContent = note;
   $('saved-note').classList.toggle('warn', warn);
-  const rows = [['Request title', rec.title], ['Department', rec.dept], ['Staff hours saved per week', String(rec.hours)],
+  const rows = [['Request title', rec.title], ['Department or directorate', rec.dept], ['Business owner', rec.owner],
+    ['Route', rec.workstream === 'WS2' ? 'Hackathon workshop (Workstream 2)' : 'Single staff request (Workstream 1)'],
+    ['Current tools used', rec.tools], ['Staff hours saved per week', String(rec.hours)],
     ['Expected benefit', rec.benefit], ['Personal data (GDPR)', rec.gdpr ? 'Yes' : 'No'], ['Financial data', rec.fin ? 'Yes' : 'No']];
   const dl = $('recap'); dl.textContent = '';
   for (const [k, v] of rows) { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = k; dd.textContent = v; dl.append(dt, dd); }
+  $('dpia-note').textContent = rec.gdpr || rec.fin
+    ? ' Because you flagged ' + (rec.gdpr && rec.fin ? 'personal and financial' : rec.gdpr ? 'personal' : 'financial') + ' data, it will be held for a DPIA check before approval.'
+    : '';
   resetForm();
   document.title = 'Request submitted: ' + BASE_TITLE;
   show('done');
@@ -469,26 +718,27 @@ async function showMine() {
   const box = $('mine'); box.textContent = '';
   document.title = 'My requests: ' + BASE_TITLE;
   show('mine'); $('h-mine').focus();
-  let list = local.slice();
+  setRoleValue('requester');
+  let list = local.filter(r => r.requester !== 'sample');
   if (canSave && uid) {
     box.append(msg('Loading your requests…'));
     try {
       const snap = await withTimeout(db.collection('requests').where('requester', '==', uid).get());
-      list = snap.docs.map(d => d.data()).concat(local);
+      list = snap.docs.map(d => d.data()).concat(local.filter(r => r.requester !== 'sample'));
     } catch (e) {
       box.textContent = '';
       box.append(msg('Your saved requests cannot be reached right now. Try again in a moment.'));
       if (!local.length) return;
     }
   }
-  list.sort((a, b) => String(b.ref).localeCompare(String(a.ref)));
+  list.sort((a, b) => (Number(b.num) || 0) - (Number(a.num) || 0) || String(b.createdAt).localeCompare(String(a.createdAt)));
   box.textContent = '';
   if (!list.length) { box.append(msg('You have not submitted any requests yet.')); return; }
   const t = document.createElement('table');
   t.innerHTML = '<caption class="sr">Your submitted requests</caption><thead><tr><th scope="col">Reference</th><th scope="col">Title</th><th scope="col">Status</th></tr></thead><tbody></tbody>';
   for (const r of list) {
     const tr = document.createElement('tr');
-    for (const [v, pill] of [[r.ref], [r.title], [r.status || 'New request', true]]) {
+    for (const [v, pill] of [[r.ref], [r.title], [r.status || 'New Requests', true]]) {
       const td = document.createElement('td');
       if (pill) { const s = document.createElement('span'); s.className = 'pill'; s.textContent = String(v); td.append(s); } else td.textContent = String(v);
       tr.append(td);
@@ -498,20 +748,318 @@ async function showMine() {
   box.append(t);
 }
 
+
+/* ---------- Roles (NFR3) ---------- */
+function setRoleUI() {
+  $('role-wrap').hidden = !canDPM;
+  document.querySelectorAll('.proto [data-dpm]').forEach(b => { b.hidden = !canDPM; });
+}
+function setRoleValue(r) {
+  role = r; $('role').value = r;
+  $('uni-sub').textContent = r === 'dpm' ? 'Digital PM workspace' : 'Digital Front Door';
+}
+async function setRole(r) {
+  if (r === 'dpm' && !canDPM) r = 'requester';
+  setRoleValue(r);
+  if (r === 'dpm') await showPipeline();
+  else { resetForm(); show('form'); $('title').focus(); }
+}
+$('role').addEventListener('change', () => setRole($('role').value));
+
+/* ---------- Digital PM pipeline (FR3, FR4, NFR5) ---------- */
+const STAGES = ['New Requests', 'Triaged/Backlog', 'In Delivery', 'Completed'];
+const PARKED = ['Deferred', 'Rejected'];
+const COLS = [['New Requests', ['New Requests']], ['Triaged/Backlog', ['Triaged/Backlog']], ['In Delivery', ['In Delivery']],
+  ['Completed', ['Completed']], ['Deferred/Rejected', PARKED]];
+const CRIT = [
+  ['sa', 'Strategic alignment', '1 = weak fit, 5 = direct fit with LSBU strategy', 30, false],
+  ['bp', 'Benefit potential', '1 = small gain, 5 = large gain', 25, false],
+  ['sv', 'Speed to value', '1 = months, 5 = days or weeks', 15, false],
+  ['cx', 'Complexity', '1 = simple, 5 = very complex (lowers priority)', 15, true],
+  ['rr', 'Resource requirement', '1 = minimal, 5 = heavy (lowers priority)', 15, true]
+];
+const priority = s => Math.round(CRIT.reduce((t, [k, , , w, inv]) => t + w * (inv ? 5 - s[k] : s[k] - 1), 0) / 4);
+const tierOf = p => p >= 75 ? 'High' : p >= 50 ? 'Medium' : 'Low';
+const money = n => '£' + Math.round(n).toLocaleString('en-GB');
+const est = r => (Number(r.hours) || 0) * 52 * 25;   // FR6: weekly hours x 52 x £25.00
+const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); };
+const fmtTime = iso => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC'; };
+const who = by => by === 'sample' ? 'Sample data' : by === 'practice' ? 'You (practice)' : uid && by === uid ? 'You' : 'Another team member';
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = String(text); return e; }
+
+let cache = [], cur = null, writing = false;
+const find = ref => cache.find(r => r.ref === ref);
+
+async function loadPipeline() {
+  if (!canSave) { cache = local; return; }
+  $('pipe-msg').textContent = 'Loading requests…';
+  try {
+    const snap = await withTimeout(db.collection('requests').get());
+    cache = snap.docs.map(d => d.data());
+    $('pipe-msg').textContent = '';
+  } catch (e) {
+    cache = [];
+    $('pipe-msg').textContent = 'The pipeline cannot be loaded right now. Press Refresh to try again.';
+  }
+}
+async function showPipeline() {
+  show('pipe');
+  document.title = 'Pipeline: ' + BASE_TITLE;
+  $('h-pipe').focus();
+  $('pipe-mode').textContent = canSave
+    ? 'Showing saved requests. Every change is saved and logged.'
+    : 'Practice mode: sample requests plus your practice submissions. Changes stay in this browser tab.';
+  await loadPipeline();
+  renderBoard();
+}
+
+function badges(r) {
+  const b = el('div', 'badges');
+  if (r.gdpr) b.append(el('span', 'badge flag', 'Personal data (GDPR)'));
+  if (r.fin) b.append(el('span', 'badge flag', 'Financial data'));
+  if (r.dpia === 'Hold') b.append(el('span', 'badge hold', 'DPIA hold'));
+  if (r.dpia === 'Approved') b.append(el('span', 'badge ok', 'DPIA approved'));
+  if (PARKED.includes(r.status)) b.append(el('span', 'badge park', r.status));
+  if (r.sample) b.append(el('span', 'badge park', 'Sample data'));
+  return b;
+}
+function tierPill(r) {
+  if (!r.triage) return el('span', 'tierpill t-none', 'Not scored');
+  return el('span', 'tierpill t-' + r.triage.tier, `Priority ${r.triage.priority}/100 · ${r.triage.tier}`);
+}
+function targetOf(r, dir) {
+  if (dir === 'reopen') return r.triage ? 'Triaged/Backlog' : 'New Requests';
+  const i = STAGES.indexOf(r.status);
+  if (i < 0) return '';
+  return dir === 'next' ? STAGES[i + 1] || '' : STAGES[i - 1] || '';
+}
+function blocker(r, to) {
+  if (to === 'Triaged/Backlog' && r.status === 'New Requests' && !r.triage)
+    return `${r.ref} needs triage scores before it can move to Triaged/Backlog.`;
+  if (to === 'In Delivery' && r.dpia === 'Hold')
+    return `${r.ref} is on DPIA hold. Record the DPIA approval before it moves into delivery.`;
+  return '';
+}
+function moveButtons(r) {
+  const out = [];
+  if (PARKED.includes(r.status)) out.push(['reopen', 'Reopen', `Reopen ${r.title} to ${targetOf(r, 'reopen')}`]);
+  else {
+    const back = targetOf(r, 'back'), next = targetOf(r, 'next');
+    if (back) out.push(['back', '← Back', `Move ${r.title} back to ${back}`]);
+    if (next) out.push(['next', 'Next →', `Move ${r.title} to ${next}`]);
+  }
+  return out;
+}
+
+function card(r) {
+  const a = el('article', 'kcard'); a.dataset.ref = r.ref;
+  a.append(el('p', 'k-meta', [r.ref, r.benefit, r.dept].join(' · ')));
+  const h = el('h3'), b = el('button', 'k-open', r.title);
+  b.type = 'button'; b.dataset.open = r.ref; h.append(b); a.append(h);
+  a.append(badges(r));
+  const f = el('div', 'k-foot'); f.append(tierPill(r), el('span', 'k-val', money(est(r)) + ' a year')); a.append(f);
+  const btns = moveButtons(r);
+  if (btns.length) {
+    const act = el('div', 'k-act');
+    for (const [dir, label, aria] of btns) {
+      const m = el('button', 'mini' + (dir !== 'back' ? ' fwd' : ''), label);
+      m.type = 'button'; m.dataset.move = dir; m.setAttribute('aria-label', aria); act.append(m);
+    }
+    a.append(act);
+  }
+  return a;
+}
+function renderBoard() {
+  const q = $('q').value.trim().toLowerCase(), cat = $('cat').value, fl = $('flagged').checked;
+  const vis = cache.filter(r => (!cat || r.benefit === cat) && (!fl || r.gdpr || r.fin) &&
+    (!q || [r.ref, r.title, r.dept].join(' ').toLowerCase().includes(q)));
+  $('count').textContent = `${vis.length} of ${cache.length} requests`;
+  const k = $('kanban'); k.textContent = '';
+  COLS.forEach(([name, states], i) => {
+    const items = vis.filter(r => states.includes(r.status || 'New Requests'))
+      .sort((a, b) => ((b.triage && b.triage.priority) || -1) - ((a.triage && a.triage.priority) || -1) || (a.num || 0) - (b.num || 0));
+    const col = el('section', 'kcol'); col.setAttribute('aria-labelledby', 'col-' + i);
+    const h = el('h2'); h.id = 'col-' + i; h.append(el('span', 'sr', 'Column: '), name, el('span', '', items.length)); col.append(h);
+    const list = el('div', 'klist');
+    if (!items.length) list.append(el('p', 'k-empty', 'Nothing here'));
+    items.forEach(r => list.append(card(r)));
+    col.append(list); k.append(col);
+  });
+}
+['q', 'cat', 'flagged'].forEach(id => $(id).addEventListener(id === 'q' ? 'input' : 'change', renderBoard));
+$('refresh').addEventListener('click', async () => { await loadPipeline(); renderBoard(); if (canSave && !$('pipe-msg').textContent) $('pipe-msg').textContent = 'Pipeline refreshed.'; });
+$('kanban').addEventListener('click', e => {
+  const o = e.target.closest('[data-open]');
+  if (o) { openDrawer(o.dataset.open); return; }
+  const m = e.target.closest('[data-move]');
+  if (m) doMove(m.closest('.kcard').dataset.ref, m.dataset.move);
+});
+
+function say(text) { if ($('drawer').open) $('d-msg').textContent = text; else $('pipe-msg').textContent = text; }
+async function change(r, patch, what) {
+  if (writing) return false;
+  writing = true;
+  const entry = { at: new Date().toISOString(), by: uid || 'practice', what };
+  const next = { ...patch, history: [...(r.history || []), entry], updatedAt: entry.at };
+  try {
+    if (canSave) await withTimeout(db.collection('requests').doc(r.ref).update(next));
+    Object.assign(r, next);
+    return true;
+  } catch (e) {
+    say(e && (e.code === 'permission_denied' || e.code === 'invalid_argument')
+      ? 'You do not have permission to change this request.'
+      : 'That change could not be saved. Check your connection, then try again.');
+    return false;
+  } finally { writing = false; }
+}
+function refocus(ref, sel) {
+  const c = [...document.querySelectorAll('.kcard')].find(x => x.dataset.ref === ref);
+  const t = c && (c.querySelector(sel) || c.querySelector('[data-open]'));
+  if (t) t.focus();
+}
+async function doMove(ref, dir) {
+  const r = find(ref); if (!r) return;
+  const to = targetOf(r, dir); if (!to) return;
+  const why = blocker(r, to);
+  if (why) {
+    if ($('drawer').open) $('d-msg').textContent = why;
+    else { $('pipe-msg').textContent = why; openDrawer(ref, why); }
+    return;
+  }
+  const ok = await change(r, { status: to }, (dir === 'reopen' ? 'Reopened to ' : 'Moved to ') + to);
+  if (!ok) return;
+  say(`${r.ref} moved to ${to}.`);
+  renderBoard();
+  if ($('drawer').open) renderDrawer(); else refocus(ref, `[data-move="${dir}"]`);
+}
+
+/* ---------- Detail drawer ---------- */
+(function buildSliders() {
+  const box = $('sliders');
+  for (const [k, label, hint] of CRIT) {
+    const d = el('div', 'crit');
+    const top = el('div', 'crit-top'), lab = el('label', '', label), out = el('output');
+    lab.htmlFor = 's-' + k; out.id = 'o-' + k; out.htmlFor = 's-' + k; top.append(lab, out);
+    const inp = el('input'); inp.type = 'range'; inp.min = 1; inp.max = 5; inp.step = 1; inp.id = 's-' + k;
+    inp.setAttribute('aria-describedby', 'h-' + k);
+    const h = el('p', 'hint', hint); h.id = 'h-' + k;
+    inp.addEventListener('input', showPrio);
+    d.append(top, inp, h); box.append(d);
+  }
+})();
+const readScores = () => Object.fromEntries(CRIT.map(([k]) => [k, Number($('s-' + k).value)]));
+function showPrio() {
+  const s = readScores(); CRIT.forEach(([k]) => { $('o-' + k).textContent = s[k]; });
+  const p = priority(s), saved = cur && cur.triage && CRIT.every(([k]) => cur.triage[k] === s[k]);
+  const pr = $('prio'); pr.textContent = `Priority: ${p}/100 · ${tierOf(p)} `;
+  pr.append(el('small', '', saved ? '(saved)' : cur && cur.triage ? '(changed, not saved yet)' : '(not saved yet)'));
+}
+function openDrawer(ref, note) {
+  cur = find(ref); if (!cur) return;
+  renderDrawer(true);
+  $('d-msg').textContent = note || '';
+  if (!$('drawer').open) $('drawer').showModal();
+  $('drawer').scrollTop = 0;
+  $('d-close').focus();
+}
+function renderDrawer(resetSliders) {
+  const r = cur; if (!r) return;
+  $('d-meta').textContent = `${r.ref} · ${r.dept} · submitted ${fmtDate(r.createdAt)}`;
+  $('d-title').textContent = r.title;
+  const bw = $('d-badges'); bw.textContent = '';
+  bw.append(el('span', 'badge park', r.status || 'New Requests'), ...badges(r).childNodes);
+  const rows = [['Business owner', r.owner], ['Route', r.workstream === 'WS2' ? 'Hackathon workshop (Workstream 2)' : 'Single staff request (Workstream 1)'],
+    ['Current process', r.process], ['Current tools used', r.tools], ['Pain points', r.pain], ['Expected benefit', r.benefit],
+    ['Staff hours saved per week', r.hours], ['Estimated annual saving (FR6)', `${money(est(r))} (hours × 52 × £25)`]];
+  const dl = $('d-details'); dl.textContent = '';
+  for (const [k, v] of rows) dl.append(el('dt', '', k), el('dd', '', v == null || v === '' ? 'Not given' : v));
+  if (resetSliders) CRIT.forEach(([k]) => { $('s-' + k).value = r.triage ? r.triage[k] : 3; });
+  $('save-scores').textContent = r.triage ? 'Update triage scores' : 'Save triage scores';
+  showPrio();
+  const flagged = r.gdpr || r.fin, kinds = r.gdpr && r.fin ? 'personal and financial' : r.gdpr ? 'personal' : 'financial';
+  $('dpia-text').textContent = !flagged ? 'Not required. No personal or financial data was flagged.'
+    : r.dpia === 'Approved' ? `Approved. This request includes ${kinds} data and its DPIA has been signed off, so it can move into delivery.`
+    : `On hold. This request includes ${kinds} data, so it cannot move to In Delivery until a Data Protection Impact Assessment is approved.`;
+  $('dpia-approve').hidden = !(flagged && r.dpia === 'Hold');
+  const parked = PARKED.includes(r.status);
+  $('move-text').textContent = `Current stage: ${r.status || 'New Requests'}.` + (parked && r.rationale ? ` Reason: ${r.rationale}` : '');
+  const back = parked ? '' : targetOf(r, 'back'), next = parked ? targetOf(r, 'reopen') : targetOf(r, 'next');
+  $('d-back').hidden = !back; $('d-back').textContent = back ? 'Back to ' + back : '';
+  $('d-next').hidden = !next; $('d-next').textContent = next ? (parked ? 'Reopen to ' : 'Move to ') + next : '';
+  $('park').hidden = parked || r.status === 'Completed';
+  const ol = $('history'); ol.textContent = '';
+  for (const h of (r.history || []).slice().reverse()) {
+    const li = el('li'), t = el('time', '', fmtTime(h.at)); t.dateTime = h.at;
+    li.append(t, `${h.what} · ${who(h.by)}`); ol.append(li);
+  }
+  if (!ol.children.length) ol.append(el('li', '', 'No changes recorded yet.'));
+}
+$('d-close').addEventListener('click', () => $('drawer').close());
+$('drawer').addEventListener('click', e => { if (e.target === $('drawer')) $('drawer').close(); });
+$('drawer').addEventListener('close', () => {
+  const ref = cur && cur.ref; cur = null;
+  $('rationale').value = ''; setRat(''); $('park').open = false;
+  renderBoard(); if (ref) refocus(ref, '[data-open]');
+});
+$('save-scores').addEventListener('click', async () => {
+  const s = readScores(), p = priority(s), t = tierOf(p);
+  const ok = await change(cur, { triage: { ...s, priority: p, tier: t, at: new Date().toISOString(), by: uid || 'practice' } },
+    `Triage scores saved: ${p}/100 (${t})`);
+  if (!ok) return;
+  renderDrawer(false); renderBoard();
+  $('d-msg').textContent = `Scores saved: priority ${p}/100, ${t}.` + (cur.status === 'New Requests' ? ' You can now move it to Triaged/Backlog.' : '');
+});
+$('dpia-approve').addEventListener('click', async () => {
+  if (!(await change(cur, { dpia: 'Approved' }, 'DPIA approval recorded'))) return;
+  renderDrawer(false); renderBoard();
+  $('d-msg').textContent = 'DPIA approval recorded. This request can now move into delivery.';
+  $('d-next').focus();
+});
+$('d-next').addEventListener('click', () => doMove(cur.ref, PARKED.includes(cur.status) ? 'reopen' : 'next'));
+$('d-back').addEventListener('click', () => doMove(cur.ref, 'back'));
+function setRat(m) {
+  const e = $('rationale-err'), t = $('rationale');
+  if (m) { e.textContent = ''; e.append(el('span', '', '⚠ '), m); e.hidden = false; t.setAttribute('aria-invalid', 'true'); }
+  else { e.hidden = true; e.textContent = ''; t.removeAttribute('aria-invalid'); }
+}
+$('d-park').addEventListener('click', async () => {
+  const why = $('rationale').value.trim(), val = document.querySelector('input[name=park]:checked').value;
+  if (why.length < 10) { setRat('Enter the reason for this decision (at least 10 characters)'); $('rationale').focus(); return; }
+  setRat('');
+  if (!(await change(cur, { status: val, rationale: why }, `${val}: ${why}`))) return;
+  $('rationale').value = ''; $('park').open = false;
+  renderDrawer(false); renderBoard();
+  $('d-msg').textContent = `${cur.ref} marked as ${val}.`;
+  $('d-close').focus();
+});
+
 /* ---------- Reviewer shortcuts (never write to the store) ---------- */
 function fillSample() {
   $('title').value = 'Automate room booking confirmations';
   $('dept').value = 'Estates and Facilities';
+  $('owner').value = 'Test User (Head of Room Bookings)';
   $('process').value = 'Each morning I copy new room bookings from the booking spreadsheet into individual confirmation emails, then mark each row as sent.';
+  $('tools').value = 'Excel, Outlook';
+  $('pain').value = 'Copying by hand takes most of the morning, and typos mean some people get the wrong room or no confirmation.';
   $('hours').value = '8';
   $('benefit').value = 'Efficiency';
   setSwitch('gdpr', true);
 }
-document.querySelectorAll('.proto button').forEach(b => b.addEventListener('click', () => {
+document.querySelectorAll('.proto button').forEach(b => b.addEventListener('click', async () => {
   const s = b.dataset.s;
+  if ($('drawer').open) $('drawer').close();
   if (s === 'mine') { showMine(); return; }
+  if (s === 'pipe') { await setRole('dpm'); return; }
+  if (s === 'triage') {
+    await setRole('dpm');
+    const r = cache.find(x => x.status === 'New Requests') || cache[0];
+    if (r) openDrawer(r.ref);
+    return;
+  }
+  setRoleValue('requester');
   show('form'); resetForm();
   if (s === 'gdpr') { setSwitch('gdpr', true); $('gdpr').focus(); }
+  else if (s === 'fin') { setSwitch('fin', true); $('fin').focus(); }
   else if (s === 'errors') { setSwitch('gdpr', true); submit(true); }
   else if (s === 'filled') { fillSample(); $('submit').focus(); }
   else if (s === 'confirm') { fillSample(); submit(true); }
