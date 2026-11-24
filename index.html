@@ -79,6 +79,10 @@ th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--soft);verti
 th{font-size:14px;color:var(--hint);font-weight:600}
 .pill{display:inline-block;background:#EFF6FF;color:var(--blue-d);border-radius:999px;padding:2px 10px;font-size:14px;font-weight:600;white-space:nowrap}
 .empty{color:var(--hint);padding:24px 0}
+.save-err{color:var(--err);background:var(--err-bg);border:2px solid var(--err);border-radius:6px;padding:10px 14px;font-weight:600;margin:0 0 20px}.save-err[hidden]{display:none}
+.mode{color:var(--hint);font-size:14px;margin:16px 0 0;text-align:right}
+.saved{font-size:14px;font-weight:600;color:var(--ok);margin:0}.saved.warn{color:var(--amb-ink)}
+.btn[disabled]{opacity:.7;cursor:progress}
 .status-msg{color:var(--ok);font-weight:600;margin:0 0 16px}.status-msg:empty{margin:0}
 details.proto{position:fixed;right:16px;bottom:16px;z-index:15;background:#0F172A;color:#fff;border-radius:10px;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(15,23,42,.25)}
 details.proto summary{cursor:pointer;padding:12px 16px;font-weight:600;font-size:14px;min-height:44px;list-style-position:inside}
@@ -97,6 +101,7 @@ details.proto summary:focus-visible{outline-color:#93C5FD}
   .field.has-err{padding-left:10px;margin-left:-14px}
   dl{grid-template-columns:minmax(0,1fr)}dd{border-top:0;padding-top:0}
   .site small{display:none}
+  .mode{text-align:left}
   details.proto{position:static;margin:0 16px 24px;max-width:none}
   main{padding-bottom:24px}
 }
@@ -122,6 +127,7 @@ details.proto summary:focus-visible{outline-color:#93C5FD}
       <p class="lead">Tell us about a manual or spreadsheet task that AI could make easier. No technical knowledge needed.</p>
       <p class="meta">It takes about 3 minutes. Every question is required, apart from the data switches.</p>
       <p class="status-msg" id="status" role="status" aria-live="polite"></p>
+      <p class="save-err" id="save-err" role="alert" hidden></p>
 
       <div class="summary" id="summary" tabindex="-1" aria-labelledby="sum-h" hidden>
         <h2 id="sum-h">There is a problem</h2>
@@ -157,8 +163,8 @@ details.proto summary:focus-visible{outline-color:#93C5FD}
 
       <div class="row">
         <div class="field" data-f="hours">
-          <label for="hours">Estimated weekly hours saved</label>
-          <span class="hint" id="hours-hint">A best guess is fine. Hours per week.</span>
+          <label for="hours">Estimated staff hours saved per week</label>
+          <span class="hint" id="hours-hint">A best guess is fine, for example 4 or 2.5.</span>
           <input type="number" id="hours" name="hours" inputmode="decimal" min="0.5" max="168" step="0.5" aria-describedby="hours-hint hours-err">
           <p class="err" id="hours-err" hidden></p>
         </div>
@@ -194,6 +200,7 @@ details.proto summary:focus-visible{outline-color:#93C5FD}
         <button type="button" class="btn secondary" id="cancel">Cancel</button>
         <button type="submit" class="btn primary" id="submit">Submit request</button>
       </div>
+      <p class="mode" id="mode">Checking whether submissions can be saved…</p>
     </form>
   </section>
 
@@ -204,6 +211,7 @@ details.proto summary:focus-visible{outline-color:#93C5FD}
     <p class="lead">Your reference number is</p>
     <p class="ref" id="ref"></p>
     <p class="meta">Keep this number. Quote it if you contact the AI Foundry team.</p>
+    <p class="saved" id="saved-note"></p>
     <dl id="recap"></dl>
     <div class="next"><strong>What happens next</strong><br>The Digital Project Manager will review and score your request, then move it into the pipeline. You can follow its status in My requests.</div>
     <div class="actions">
@@ -239,9 +247,13 @@ details.proto summary:focus-visible{outline-color:#93C5FD}
 const $ = id => document.getElementById(id);
 const form = $('form');
 const BASE_TITLE = 'Digital Front Door prototype';
-let nextRef = 6;
-const submitted = [];
+const TAB = 'tab-' + Math.random().toString(36).slice(2);
+const local = [];          // used when the page cannot save (downloaded copy, signed out, view-only)
+let localNext = 1;
+let db = null, uid = null, canSave = false;
 const touched = new Set();
+const refOf = n => 'AIF-' + String(n).padStart(3, '0');
+const withTimeout = (p, ms = 10000) => Promise.race([p, new Promise((_, r) => setTimeout(() => r({ code: 'timeout' }), ms))]);
 
 const rules = {
   title: v => v.trim() ? '' : 'Enter a request title',
@@ -249,17 +261,59 @@ const rules = {
   process: v => !v.trim() ? 'Describe the current process'
     : v.trim().length < 20 ? 'Describe the current process in a little more detail (at least 20 characters)' : '',
   hours: v => {
-    if (v.trim() === '') return 'Enter weekly hours saved, more than 0';
+    if (v.trim() === '') return 'Enter staff hours saved per week, more than 0';
     const n = Number(v);
-    if (!isFinite(n)) return 'Enter weekly hours saved as a number, like 4 or 2.5';
-    if (n <= 0) return 'Enter weekly hours saved, more than 0';
-    if (n > 168) return 'Enter weekly hours saved, 168 or fewer';
+    if (!isFinite(n)) return 'Enter staff hours saved per week as a number, like 4 or 2.5';
+    if (n <= 0) return 'Enter staff hours saved per week, more than 0';
+    if (n > 168) return 'Enter staff hours saved per week, 168 or fewer';
     return '';
   },
   benefit: v => v ? '' : 'Select the main benefit you expect'
 };
 const order = Object.keys(rules);
 
+/* ---------- Saving: the artifact's own database when available ---------- */
+function setMode() {
+  $('mode').textContent = canSave
+    ? 'Submissions are saved and get a unique reference number.'
+    : 'Practice mode: this copy cannot save submissions, so nothing leaves your browser.';
+}
+(async () => {
+  try {
+    if (window.claude && typeof window.claude.use === 'function') {
+      db = await window.claude.use('db');
+      const u = await window.claude.use('user');
+      if (u) uid = await u.id();
+      if (u && db) { const w = await u.can('data.write'); canSave = w !== false; }
+      else canSave = !!db;
+    }
+  } catch (e) { db = null; canSave = false; }
+  setMode();
+})();
+setTimeout(() => { if ($('mode').textContent.startsWith('Checking')) setMode(); }, 11000);
+
+async function saveToDb(rec) {
+  const col = db.collection('requests');
+  const top = await withTimeout(col.orderBy('num', 'desc').limit(1).get());
+  let n = top.empty ? 1 : (Number(top.docs[0].data().num) || 0) + 1;
+  for (let tries = 0; tries < 20; tries++, n++) {
+    const ref = refOf(n), d = col.doc(ref);
+    const lease = await withTimeout(d.acquire({ holder: uid || TAB, ttlMs: 5000 }));
+    if (!lease.acquired) continue;
+    const snap = await withTimeout(d.get());
+    if (snap.exists) continue;
+    await withTimeout(d.set({ ...rec, num: n, ref }));
+    return ref;
+  }
+  throw { code: 'busy' };
+}
+function saveLocal(rec) {
+  const ref = refOf(localNext++);
+  local.unshift({ ...rec, ref });
+  return ref;
+}
+
+/* ---------- Validation ---------- */
 function setError(id, msg) {
   const input = $(id), err = $(id + '-err'), wrap = input.closest('.field');
   if (msg) {
@@ -276,7 +330,7 @@ function setError(id, msg) {
 }
 function check(id) { const m = rules[id]($(id).value); setError(id, m); return m; }
 
-/* Real-time validation: on leaving a field, and live while typing once an error shows (or for hours as soon as a value is typed) */
+/* Real-time: on leaving a field, and live while typing once an error shows (hours as soon as a value is typed) */
 for (const id of order) {
   const el = $(id);
   el.addEventListener('blur', () => { touched.add(id); check(id); refreshSummary(); });
@@ -284,7 +338,6 @@ for (const id of order) {
     if (touched.has(id) || el.getAttribute('aria-invalid') || (id === 'hours' && el.value !== '')) { check(id); refreshSummary(); }
   });
 }
-
 function refreshSummary() {
   const s = $('summary');
   if (s.hidden) return;
@@ -298,12 +351,12 @@ function renderSummary(errs) {
   for (const [id, msg] of errs) {
     const li = document.createElement('li'), a = document.createElement('a');
     a.href = '#' + id; a.textContent = msg;
-    a.addEventListener('click', e => { e.preventDefault(); $(id).focus(); $(id).scrollIntoView({block: 'center'}); });
+    a.addEventListener('click', e => { e.preventDefault(); $(id).focus(); $(id).scrollIntoView({ block: 'center' }); });
     li.append(a); ul.append(li);
   }
 }
 
-/* Switches */
+/* ---------- Switches ---------- */
 function setSwitch(id, on) {
   const b = $(id);
   b.setAttribute('aria-checked', String(on));
@@ -321,7 +374,7 @@ for (const id of ['gdpr', 'fin']) {
 }
 const isOn = id => $(id).getAttribute('aria-checked') === 'true';
 
-/* Button order: desktop Cancel then Submit; mobile Submit then Cancel. DOM order follows visual order so tab order always matches. */
+/* Desktop: Cancel then Submit. Mobile: Submit then Cancel. DOM order follows visual order so tab order matches. */
 const mq = matchMedia('(max-width: 600px)');
 function orderButtons() {
   const a = $('actions');
@@ -333,18 +386,20 @@ function resetForm(msg) {
   form.reset(); touched.clear();
   order.forEach(id => setError(id, ''));
   setSwitch('gdpr', false); setSwitch('fin', false);
-  $('summary').hidden = true; document.title = BASE_TITLE;
+  $('summary').hidden = true; $('save-err').hidden = true;
+  document.title = BASE_TITLE;
   $('status').textContent = msg || '';
 }
-
 function show(view) {
   for (const v of ['form', 'done', 'mine']) $('view-' + v).hidden = v !== view;
   window.scrollTo(0, 0);
 }
 
-form.addEventListener('submit', e => {
-  e.preventDefault();
-  $('status').textContent = '';
+/* ---------- Submit ---------- */
+let busy = false;
+async function submit(practice) {
+  if (busy) return;
+  $('status').textContent = ''; $('save-err').hidden = true;
   order.forEach(id => touched.add(id));
   const errs = order.map(id => [id, check(id)]).filter(x => x[1]);
   if (errs.length) {
@@ -354,14 +409,46 @@ form.addEventListener('submit', e => {
     $('summary').focus();
     return;
   }
-  const ref = 'AIF-' + String(nextRef++).padStart(3, '0');
   const rec = {
-    ref, title: $('title').value.trim(), dept: $('dept').value, hours: Number($('hours').value),
-    benefit: $('benefit').value, gdpr: isOn('gdpr'), fin: isOn('fin')
+    title: $('title').value.trim(), dept: $('dept').value, process: $('process').value.trim(),
+    hours: Number($('hours').value), benefit: $('benefit').value, gdpr: isOn('gdpr'), fin: isOn('fin'),
+    status: 'New request', requester: uid || null, createdAt: new Date().toISOString()
   };
-  submitted.unshift(rec);
+  let ref, note, warn = false;
+  if (canSave && !practice) {
+    busy = true; $('submit').disabled = true; $('submit').textContent = 'Submitting…';
+    try {
+      ref = await saveToDb(rec);
+      note = 'Saved. The Digital Project Manager can now see this request.';
+    } catch (e) {
+      if (e && e.code === 'invalid_argument') {
+        canSave = false; setMode();
+        ref = saveLocal(rec); warn = true;
+        note = 'Not saved: you have view-only access to this page, so this is a practice submission.';
+      } else {
+        $('save-err').textContent = e && e.code === 'quota_exceeded'
+          ? 'We could not save your request because the request store is full. Contact the AI Foundry team.'
+          : 'We could not save your request just now. Check your connection, then press Submit request again. Your answers are still here.';
+        $('save-err').hidden = false; $('save-err').setAttribute('tabindex', '-1'); $('save-err').focus();
+        return;
+      }
+    } finally {
+      busy = false; $('submit').disabled = false; $('submit').textContent = 'Submit request';
+    }
+  } else {
+    ref = saveLocal(rec); warn = true;
+    note = practice ? 'Preview only: this reviewer shortcut does not save anything.'
+      : 'Practice mode: this reference is not saved anywhere.';
+  }
+  showConfirmation(ref, rec, note, warn);
+}
+form.addEventListener('submit', e => { e.preventDefault(); submit(false); });
+
+function showConfirmation(ref, rec, note, warn) {
   $('ref').textContent = ref;
-  const rows = [['Request title', rec.title], ['Department', rec.dept], ['Weekly hours saved', String(rec.hours)],
+  $('saved-note').textContent = note;
+  $('saved-note').classList.toggle('warn', warn);
+  const rows = [['Request title', rec.title], ['Department', rec.dept], ['Staff hours saved per week', String(rec.hours)],
     ['Expected benefit', rec.benefit], ['Personal data (GDPR)', rec.gdpr ? 'Yes' : 'No'], ['Financial data', rec.fin ? 'Yes' : 'No']];
   const dl = $('recap'); dl.textContent = '';
   for (const [k, v] of rows) { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = k; dd.textContent = v; dl.append(dt, dd); }
@@ -369,36 +456,49 @@ form.addEventListener('submit', e => {
   document.title = 'Request submitted: ' + BASE_TITLE;
   show('done');
   $('h-done').focus();
-});
+}
 
 $('cancel').addEventListener('click', () => { resetForm('Form cleared. Nothing was submitted.'); $('title').focus(); });
-$('another').addEventListener('click', () => { resetForm(); document.title = BASE_TITLE; show('form'); $('title').focus(); });
+$('another').addEventListener('click', () => { resetForm(); show('form'); $('title').focus(); });
 $('new-from-mine').addEventListener('click', () => $('another').click());
 $('track').addEventListener('click', showMine);
 
-function showMine() {
+/* ---------- My requests ---------- */
+function msg(text) { const p = document.createElement('p'); p.className = 'empty'; p.textContent = text; return p; }
+async function showMine() {
   const box = $('mine'); box.textContent = '';
-  if (!submitted.length) {
-    const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'You have not submitted any requests yet.'; box.append(p);
-  } else {
-    const t = document.createElement('table');
-    t.innerHTML = '<caption class="sr">Your submitted requests</caption><thead><tr><th scope="col">Reference</th><th scope="col">Title</th><th scope="col">Status</th></tr></thead><tbody></tbody>';
-    for (const r of submitted) {
-      const tr = document.createElement('tr');
-      for (const [v, pill] of [[r.ref], [r.title], ['New request', true]]) {
-        const td = document.createElement('td');
-        if (pill) { const s = document.createElement('span'); s.className = 'pill'; s.textContent = v; td.append(s); } else td.textContent = v;
-        tr.append(td);
-      }
-      t.tBodies[0].append(tr);
-    }
-    box.append(t);
-  }
   document.title = 'My requests: ' + BASE_TITLE;
   show('mine'); $('h-mine').focus();
+  let list = local.slice();
+  if (canSave && uid) {
+    box.append(msg('Loading your requests…'));
+    try {
+      const snap = await withTimeout(db.collection('requests').where('requester', '==', uid).get());
+      list = snap.docs.map(d => d.data()).concat(local);
+    } catch (e) {
+      box.textContent = '';
+      box.append(msg('Your saved requests cannot be reached right now. Try again in a moment.'));
+      if (!local.length) return;
+    }
+  }
+  list.sort((a, b) => String(b.ref).localeCompare(String(a.ref)));
+  box.textContent = '';
+  if (!list.length) { box.append(msg('You have not submitted any requests yet.')); return; }
+  const t = document.createElement('table');
+  t.innerHTML = '<caption class="sr">Your submitted requests</caption><thead><tr><th scope="col">Reference</th><th scope="col">Title</th><th scope="col">Status</th></tr></thead><tbody></tbody>';
+  for (const r of list) {
+    const tr = document.createElement('tr');
+    for (const [v, pill] of [[r.ref], [r.title], [r.status || 'New request', true]]) {
+      const td = document.createElement('td');
+      if (pill) { const s = document.createElement('span'); s.className = 'pill'; s.textContent = String(v); td.append(s); } else td.textContent = String(v);
+      tr.append(td);
+    }
+    t.tBodies[0].append(tr);
+  }
+  box.append(t);
 }
 
-/* Prototype state shortcuts */
+/* ---------- Reviewer shortcuts (never write to the store) ---------- */
 function fillSample() {
   $('title').value = 'Automate room booking confirmations';
   $('dept').value = 'Estates and Facilities';
@@ -409,15 +509,16 @@ function fillSample() {
 }
 document.querySelectorAll('.proto button').forEach(b => b.addEventListener('click', () => {
   const s = b.dataset.s;
-  if (s === 'mine') { if (!submitted.length) { show('form'); resetForm(); fillSample(); form.requestSubmit(); } showMine(); return; }
+  if (s === 'mine') { showMine(); return; }
   show('form'); resetForm();
   if (s === 'gdpr') { setSwitch('gdpr', true); $('gdpr').focus(); }
-  else if (s === 'errors') { setSwitch('gdpr', true); form.requestSubmit(); }
+  else if (s === 'errors') { setSwitch('gdpr', true); submit(true); }
   else if (s === 'filled') { fillSample(); $('submit').focus(); }
-  else if (s === 'confirm') { fillSample(); form.requestSubmit(); }
+  else if (s === 'confirm') { fillSample(); submit(true); }
   else $('title').focus();
 }));
 }
+
 </script>
 </body>
 </html>
