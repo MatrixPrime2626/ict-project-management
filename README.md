@@ -4,7 +4,7 @@ UX prototype for the **AI Foundry** at London South Bank University, built for t
 
 LSBU staff use the Digital Front Door to submit process-automation requests. Digital Project Managers then score, triage and move those requests through the AI Foundry pipeline.
 
-> This is a UX prototype, not a production system. Outside the Claude artifact it runs in **practice mode**: nothing is saved, and sample data is used so both the Requester and Digital Project Manager journeys can be walked through.
+> This is a UX prototype, not a production system. Outside the artifact it runs in **practice mode**: nothing is saved, and sample data is used so both the Requester and Digital Project Manager journeys can be walked through.
 
 ## Run it
 
