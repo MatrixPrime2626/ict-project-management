@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digital Front Door prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: calm, plain-language public-sector form; nothing competes with the task
+   IDEA: the AI Foundry Figma wireframes D1-D4 / M1-M3, made real and clickable
+   PICTURE: the form itself, one 720px column, top of the page
+   COLOUR and TYPE: colours exactly as the A1 WCAG 2.2 AA spec (slate ink, #1D4ED8 blue, #B91C1C error, #B45309 amber); Inter
+   LAYOUT: header, persistent governance notice, form card; stacks with 16px gutters under 600px */
+:root{color-scheme:light;--ink:#0F172A;--hint:#475569;--line:#64748B;--soft:#E2E8F0;--page:#F8FAFC;--blue:#1D4ED8;--blue-d:#1E3A8A;--err:#B91C1C;--err-bg:#FEF2F2;--amb:#B45309;--amb-ink:#78350F;--amb-bg:#FFFBEB;--ok:#166534}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:120px}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:clip}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;box-shadow:0 0 0 3px #fff}
+.skip{position:absolute;left:16px;top:-100px;background:#fff;color:var(--blue);padding:12px 16px;font-weight:600;z-index:20;border:2px solid var(--blue);border-radius:6px}
+.skip:focus{top:12px}
+header.site{background:#fff;border-bottom:1px solid var(--soft);padding:12px max(32px,calc((100% - 1376px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-weight:700;font-size:17px;min-height:44px}
+.mark{width:32px;height:32px;border-radius:7px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700}
+.site small{color:var(--hint);font-size:14px}
+.notice{position:sticky;top:0;z-index:10;background:#EFF6FF;border-bottom:1px solid #BFDBFE;color:var(--blue-d);padding:12px max(32px,calc((100% - 1376px)/2));display:flex;gap:12px;align-items:flex-start;font-size:15px}
+.notice .i{flex:none;width:24px;height:24px;border-radius:50%;background:var(--blue-d);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
+main{padding:32px 16px 96px}main:focus{outline:none}
+.card{max-width:720px;margin:0 auto;background:#fff;border:1px solid var(--soft);border-radius:12px;padding:32px}
+h1{font-size:28px;line-height:1.2;margin:0 0 8px;text-wrap:balance}
+h2{font-size:20px;line-height:1.3;margin:0 0 8px}
+.lead{color:var(--hint);margin:0 0 4px}
+.meta{color:var(--hint);font-size:14px;margin:0 0 24px}
+.field{margin:0 0 24px;padding:0}
+.field.has-err{border-left:4px solid var(--err);padding-left:14px;margin-left:-18px}
+label,.legend{display:block;font-weight:600;margin-bottom:2px}
+.hint{display:block;color:var(--hint);font-size:14px;margin-bottom:8px}
+input[type=text],input[type=number],select,textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:6px;padding:10px 12px;min-height:44px}
+textarea{min-height:112px;resize:vertical}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23475569' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px}
+::placeholder{color:var(--line)}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--blue);outline-offset:0;box-shadow:0 0 0 6px #fff}
+[aria-invalid=true]{border:2px solid var(--err)!important}
+.err{display:flex;gap:6px;align-items:flex-start;color:var(--err);background:var(--err-bg);font-size:14px;font-weight:600;padding:6px 10px;border-radius:4px;margin-top:8px}
+.err[hidden]{display:none}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+fieldset{border:0;margin:0 0 24px;padding:0}
+legend{padding:0}
+.switch-row{display:flex;justify-content:space-between;align-items:center;gap:16px;border:1px solid var(--soft);border-radius:8px;padding:12px 14px;margin-top:12px;cursor:pointer}
+.switch-row.on{border-color:var(--amb)}
+.switch-row .t{font-weight:600}.switch-row .d{color:var(--hint);font-size:14px}
+.sw{flex:none;display:inline-flex;align-items:center;gap:8px;min-width:76px;min-height:44px;padding:0 6px 0 12px;border:2px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);font:600 14px Inter,sans-serif;cursor:pointer;justify-content:space-between}
+.sw .k{width:24px;height:24px;border-radius:50%;background:var(--line)}
+.sw[aria-checked=true]{background:var(--amb);border-color:var(--amb);color:#fff;flex-direction:row-reverse;padding:0 12px 0 6px}
+.sw[aria-checked=true] .k{background:#fff}
+.alert{border:2px solid var(--amb);border-left-width:6px;background:var(--amb-bg);color:var(--amb-ink);border-radius:6px;padding:12px 14px;margin-top:12px;font-size:15px}
+.alert strong{display:block;font-size:16px}
+.summary{border:3px solid var(--err);background:var(--err-bg);border-radius:8px;padding:16px 18px;margin:0 0 28px}
+.summary h2{color:var(--err);font-size:19px}
+.summary p{margin:0 0 6px}
+.summary ul{margin:0;padding-left:20px}
+.summary a{color:var(--blue);font-weight:600;text-underline-offset:3px}
+.actions{display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px}
+.btn{font:600 16px Inter,sans-serif;min-height:44px;padding:10px 20px;border-radius:6px;cursor:pointer;border:2px solid var(--blue);text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.primary{background:var(--blue);color:#fff}.primary:hover{background:var(--blue-d);border-color:var(--blue-d)}
+.secondary{background:#fff;color:var(--blue)}.secondary:hover{background:#EFF6FF}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.done{text-align:center}
+.tick{width:56px;height:56px;border-radius:50%;background:#DCFCE7;color:var(--ok);display:grid;place-items:center;margin:0 auto 12px;font-size:28px;font-weight:700}
+.ref{font-size:clamp(32px,8vw,44px);font-weight:700;letter-spacing:.02em;margin:4px 0}
+dl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);margin:24px 0;border:1px solid var(--soft);border-radius:8px;text-align:left}
+dt,dd{margin:0;padding:10px 14px;border-top:1px solid var(--soft)}
+dt{color:var(--hint)}dd{font-weight:600;overflow-wrap:anywhere}
+dt:first-of-type,dd:first-of-type{border-top:0}
+.next{background:#EFF6FF;color:var(--blue-d);border-radius:8px;padding:14px 16px;text-align:left;margin-bottom:24px}
+.done .actions{justify-content:center}
+table{width:100%;border-collapse:collapse;margin-top:16px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--soft);vertical-align:top}
+th{font-size:14px;color:var(--hint);font-weight:600}
+.pill{display:inline-block;background:#EFF6FF;color:var(--blue-d);border-radius:999px;padding:2px 10px;font-size:14px;font-weight:600;white-space:nowrap}
+.empty{color:var(--hint);padding:24px 0}
+.status-msg{color:var(--ok);font-weight:600;margin:0 0 16px}.status-msg:empty{margin:0}
+details.proto{position:fixed;right:16px;bottom:16px;z-index:15;background:#0F172A;color:#fff;border-radius:10px;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(15,23,42,.25)}
+details.proto summary{cursor:pointer;padding:12px 16px;font-weight:600;font-size:14px;min-height:44px;list-style-position:inside}
+details.proto summary:focus-visible{outline-color:#93C5FD}
+.proto .in{padding:0 16px 14px;display:flex;flex-wrap:wrap;gap:8px;max-width:420px}
+.proto p{margin:0 0 4px;width:100%;font-size:13px;color:#CBD5E1}
+.proto button{font:600 14px Inter,sans-serif;background:#1E293B;color:#fff;border:1px solid #475569;border-radius:6px;padding:8px 12px;min-height:40px;cursor:pointer}
+.proto button:hover{background:#334155}
+.proto button:focus-visible{outline:3px solid #93C5FD}
+@media(max-width:600px){
+  header.site,.notice{padding-left:16px;padding-right:16px}
+  main{padding:20px 16px 96px}
+  .card{padding:20px 16px;border-radius:10px}
+  .row{grid-template-columns:minmax(0,1fr);gap:0}
+  .actions{flex-direction:column;align-items:stretch}
+  .field.has-err{padding-left:10px;margin-left:-14px}
+  dl{grid-template-columns:minmax(0,1fr)}dd{border-top:0;padding-top:0}
+  .site small{display:none}
+  details.proto{position:static;margin:0 16px 24px;max-width:none}
+  main{padding-bottom:24px}
+}
+@media(prefers-reduced-motion:no-preference){.alert,.summary{animation:in .2s ease-out}@keyframes in{from{opacity:0;transform:translateY(-4px)}}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header class="site">
+  <a class="logo" href="#main" id="home"><span class="mark" aria-hidden="true">AI</span>AI Foundry</a>
+  <small>Digital Front Door · London South Bank University</small>
+</header>
+<div class="notice" role="note" aria-label="Governance notice">
+  <span class="i" aria-hidden="true">i</span>
+  <span><strong>Test data only.</strong> Do not enter real personal, student, staff or financial information anywhere on this page.</span>
+</div>
+
+<main id="main" tabindex="-1">
+  <!-- FORM VIEW -->
+  <section class="card" id="view-form" aria-labelledby="h-form">
+    <form id="form" novalidate>
+      <h1 id="h-form">Submit an opportunity</h1>
+      <p class="lead">Tell us about a manual or spreadsheet task that AI could make easier. No technical knowledge needed.</p>
+      <p class="meta">It takes about 3 minutes. Every question is required, apart from the data switches.</p>
+      <p class="status-msg" id="status" role="status" aria-live="polite"></p>
+
+      <div class="summary" id="summary" tabindex="-1" aria-labelledby="sum-h" hidden>
+        <h2 id="sum-h">There is a problem</h2>
+        <p id="sum-count"></p>
+        <ul id="sum-list"></ul>
+      </div>
+
+      <div class="field" data-f="title">
+        <label for="title">Request title</label>
+        <span class="hint" id="title-hint">A short name for what you want to improve.</span>
+        <input type="text" id="title" name="title" maxlength="100" autocomplete="off" placeholder="e.g. Automate room booking confirmations" aria-describedby="title-hint title-err">
+        <p class="err" id="title-err" hidden></p>
+      </div>
+
+      <div class="field" data-f="dept">
+        <label for="dept">Department</label>
+        <span class="hint" id="dept-hint">The team the work happens in.</span>
+        <select id="dept" name="dept" aria-describedby="dept-hint dept-err">
+          <option value="">Select…</option>
+          <option>Estates and Facilities</option><option>Finance</option><option>Human Resources</option><option>IT Services</option>
+          <option>Library and Learning Resources</option><option>Marketing and Recruitment</option><option>Student Services</option>
+          <option>A school or academic department</option><option>Other</option>
+        </select>
+        <p class="err" id="dept-err" hidden></p>
+      </div>
+
+      <div class="field" data-f="process">
+        <label for="process">Current process description</label>
+        <span class="hint" id="process-hint">What do you do today, step by step? Mention any spreadsheets involved.</span>
+        <textarea id="process" name="process" placeholder="Describe the current process…" aria-describedby="process-hint process-err"></textarea>
+        <p class="err" id="process-err" hidden></p>
+      </div>
+
+      <div class="row">
+        <div class="field" data-f="hours">
+          <label for="hours">Estimated weekly hours saved</label>
+          <span class="hint" id="hours-hint">A best guess is fine. Hours per week.</span>
+          <input type="number" id="hours" name="hours" inputmode="decimal" min="0.5" max="168" step="0.5" aria-describedby="hours-hint hours-err">
+          <p class="err" id="hours-err" hidden></p>
+        </div>
+        <div class="field" data-f="benefit">
+          <label for="benefit">Expected benefit category</label>
+          <span class="hint" id="benefit-hint">The main thing you hope will improve.</span>
+          <select id="benefit" name="benefit" aria-describedby="benefit-hint benefit-err">
+            <option value="">Select…</option>
+            <option value="Efficiency">Save staff time (Efficiency)</option>
+            <option value="Service">Better service for students or staff (Service)</option>
+            <option value="Risk">Fewer errors or less risk (Risk)</option>
+            <option value="Data">Better data or reporting (Data)</option>
+          </select>
+          <p class="err" id="benefit-err" hidden></p>
+        </div>
+      </div>
+
+      <fieldset aria-describedby="data-hint">
+        <legend class="legend">Data involved</legend>
+        <span class="hint" id="data-hint">Switch on anything that applies. If unsure, leave it off and the project manager will check.</span>
+        <div class="switch-row" id="row-gdpr">
+          <div><div class="t" id="gdpr-l">Personal data (GDPR)</div><div class="d" id="gdpr-d">Information about identifiable people, such as students or staff.</div></div>
+          <button type="button" class="sw" id="gdpr" role="switch" aria-checked="false" aria-labelledby="gdpr-l" aria-describedby="gdpr-d"><span class="v">No</span><span class="k" aria-hidden="true"></span></button>
+        </div>
+        <div id="gdpr-alert-slot" aria-live="polite"></div>
+        <div class="switch-row" id="row-fin">
+          <div><div class="t" id="fin-l">Financial data</div><div class="d" id="fin-d">Payments, budgets, invoices or other money-related records.</div></div>
+          <button type="button" class="sw" id="fin" role="switch" aria-checked="false" aria-labelledby="fin-l" aria-describedby="fin-d"><span class="v">No</span><span class="k" aria-hidden="true"></span></button>
+        </div>
+      </fieldset>
+
+      <div class="actions" id="actions">
+        <button type="button" class="btn secondary" id="cancel">Cancel</button>
+        <button type="submit" class="btn primary" id="submit">Submit request</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- CONFIRMATION VIEW -->
+  <section class="card done" id="view-done" aria-labelledby="h-done" hidden>
+    <div class="tick" aria-hidden="true">✓</div>
+    <h1 id="h-done" tabindex="-1">Request submitted</h1>
+    <p class="lead">Your reference number is</p>
+    <p class="ref" id="ref"></p>
+    <p class="meta">Keep this number. Quote it if you contact the AI Foundry team.</p>
+    <dl id="recap"></dl>
+    <div class="next"><strong>What happens next</strong><br>The Digital Project Manager will review and score your request, then move it into the pipeline. You can follow its status in My requests.</div>
+    <div class="actions">
+      <button type="button" class="btn primary" id="track">Track my requests</button>
+      <button type="button" class="btn secondary" id="another">Submit another request</button>
+    </div>
+  </section>
+
+  <!-- MY REQUESTS VIEW -->
+  <section class="card" id="view-mine" aria-labelledby="h-mine" hidden>
+    <h1 id="h-mine" tabindex="-1">My requests</h1>
+    <p class="lead">Requests you have submitted in this session and where they are now.</p>
+    <div id="mine"></div>
+    <div class="actions"><button type="button" class="btn primary" id="new-from-mine">Submit a new request</button></div>
+  </section>
+</main>
+
+<details class="proto">
+  <summary>Prototype states</summary>
+  <div class="in">
+    <p>For reviewers. Jump to each wireframe state (D1–D4, M1–M3).</p>
+    <button type="button" data-s="empty">Empty form</button>
+    <button type="button" data-s="gdpr">GDPR on</button>
+    <button type="button" data-s="errors">Validation errors</button>
+    <button type="button" data-s="filled">Completed form</button>
+    <button type="button" data-s="confirm">Confirmation</button>
+    <button type="button" data-s="mine">My requests</button>
+  </div>
+</details>
+
+<script>
+{
+const $ = id => document.getElementById(id);
+const form = $('form');
+const BASE_TITLE = 'Digital Front Door prototype';
+let nextRef = 6;
+const submitted = [];
+const touched = new Set();
+
+const rules = {
+  title: v => v.trim() ? '' : 'Enter a request title',
+  dept: v => v ? '' : 'Select your department',
+  process: v => !v.trim() ? 'Describe the current process'
+    : v.trim().length < 20 ? 'Describe the current process in a little more detail (at least 20 characters)' : '',
+  hours: v => {
+    if (v.trim() === '') return 'Enter weekly hours saved, more than 0';
+    const n = Number(v);
+    if (!isFinite(n)) return 'Enter weekly hours saved as a number, like 4 or 2.5';
+    if (n <= 0) return 'Enter weekly hours saved, more than 0';
+    if (n > 168) return 'Enter weekly hours saved, 168 or fewer';
+    return '';
+  },
+  benefit: v => v ? '' : 'Select the main benefit you expect'
+};
+const order = Object.keys(rules);
+
+function setError(id, msg) {
+  const input = $(id), err = $(id + '-err'), wrap = input.closest('.field');
+  if (msg) {
+    err.innerHTML = '<span aria-hidden="true">⚠</span><span><span class="sr">Error: </span></span>';
+    err.lastChild.append(msg);
+    err.hidden = false;
+    input.setAttribute('aria-invalid', 'true');
+    wrap.classList.add('has-err');
+  } else {
+    err.hidden = true; err.textContent = '';
+    input.removeAttribute('aria-invalid');
+    wrap.classList.remove('has-err');
+  }
+}
+function check(id) { const m = rules[id]($(id).value); setError(id, m); return m; }
+
+/* Real-time validation: on leaving a field, and live while typing once an error shows (or for hours as soon as a value is typed) */
+for (const id of order) {
+  const el = $(id);
+  el.addEventListener('blur', () => { touched.add(id); check(id); refreshSummary(); });
+  el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => {
+    if (touched.has(id) || el.getAttribute('aria-invalid') || (id === 'hours' && el.value !== '')) { check(id); refreshSummary(); }
+  });
+}
+
+function refreshSummary() {
+  const s = $('summary');
+  if (s.hidden) return;
+  const errs = order.map(id => [id, rules[id]($(id).value)]).filter(e => e[1]);
+  if (!errs.length) { s.hidden = true; document.title = BASE_TITLE; return; }
+  renderSummary(errs);
+}
+function renderSummary(errs) {
+  $('sum-count').textContent = errs.length === 1 ? 'Fix this item, then submit again:' : `Fix these ${errs.length} items, then submit again:`;
+  const ul = $('sum-list'); ul.textContent = '';
+  for (const [id, msg] of errs) {
+    const li = document.createElement('li'), a = document.createElement('a');
+    a.href = '#' + id; a.textContent = msg;
+    a.addEventListener('click', e => { e.preventDefault(); $(id).focus(); $(id).scrollIntoView({block: 'center'}); });
+    li.append(a); ul.append(li);
+  }
+}
+
+/* Switches */
+function setSwitch(id, on) {
+  const b = $(id);
+  b.setAttribute('aria-checked', String(on));
+  b.querySelector('.v').textContent = on ? 'Yes' : 'No';
+  b.closest('.switch-row').classList.toggle('on', on);
+  if (id === 'gdpr') {
+    $('gdpr-alert-slot').innerHTML = on
+      ? '<div class="alert"><strong><span aria-hidden="true">⚠ </span>Personal data selected</strong>Do not type names, student numbers or any other details that identify a person. Describe the type of data instead, for example “student enrolment records”. The project manager will arrange a data protection check.</div>'
+      : '';
+  }
+}
+for (const id of ['gdpr', 'fin']) {
+  $(id).addEventListener('click', e => { e.stopPropagation(); setSwitch(id, $(id).getAttribute('aria-checked') !== 'true'); });
+  $(id).closest('.switch-row').addEventListener('click', () => $(id).click());
+}
+const isOn = id => $(id).getAttribute('aria-checked') === 'true';
+
+/* Button order: desktop Cancel then Submit; mobile Submit then Cancel. DOM order follows visual order so tab order always matches. */
+const mq = matchMedia('(max-width: 600px)');
+function orderButtons() {
+  const a = $('actions');
+  if (mq.matches) a.append($('submit'), $('cancel')); else a.append($('cancel'), $('submit'));
+}
+mq.addEventListener('change', orderButtons); orderButtons();
+
+function resetForm(msg) {
+  form.reset(); touched.clear();
+  order.forEach(id => setError(id, ''));
+  setSwitch('gdpr', false); setSwitch('fin', false);
+  $('summary').hidden = true; document.title = BASE_TITLE;
+  $('status').textContent = msg || '';
+}
+
+function show(view) {
+  for (const v of ['form', 'done', 'mine']) $('view-' + v).hidden = v !== view;
+  window.scrollTo(0, 0);
+}
+
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  $('status').textContent = '';
+  order.forEach(id => touched.add(id));
+  const errs = order.map(id => [id, check(id)]).filter(x => x[1]);
+  if (errs.length) {
+    renderSummary(errs);
+    $('summary').hidden = false;
+    document.title = 'Error: ' + BASE_TITLE;
+    $('summary').focus();
+    return;
+  }
+  const ref = 'AIF-' + String(nextRef++).padStart(3, '0');
+  const rec = {
+    ref, title: $('title').value.trim(), dept: $('dept').value, hours: Number($('hours').value),
+    benefit: $('benefit').value, gdpr: isOn('gdpr'), fin: isOn('fin')
+  };
+  submitted.unshift(rec);
+  $('ref').textContent = ref;
+  const rows = [['Request title', rec.title], ['Department', rec.dept], ['Weekly hours saved', String(rec.hours)],
+    ['Expected benefit', rec.benefit], ['Personal data (GDPR)', rec.gdpr ? 'Yes' : 'No'], ['Financial data', rec.fin ? 'Yes' : 'No']];
+  const dl = $('recap'); dl.textContent = '';
+  for (const [k, v] of rows) { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = k; dd.textContent = v; dl.append(dt, dd); }
+  resetForm();
+  document.title = 'Request submitted: ' + BASE_TITLE;
+  show('done');
+  $('h-done').focus();
+});
+
+$('cancel').addEventListener('click', () => { resetForm('Form cleared. Nothing was submitted.'); $('title').focus(); });
+$('another').addEventListener('click', () => { resetForm(); document.title = BASE_TITLE; show('form'); $('title').focus(); });
+$('new-from-mine').addEventListener('click', () => $('another').click());
+$('track').addEventListener('click', showMine);
+
+function showMine() {
+  const box = $('mine'); box.textContent = '';
+  if (!submitted.length) {
+    const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'You have not submitted any requests yet.'; box.append(p);
+  } else {
+    const t = document.createElement('table');
+    t.innerHTML = '<caption class="sr">Your submitted requests</caption><thead><tr><th scope="col">Reference</th><th scope="col">Title</th><th scope="col">Status</th></tr></thead><tbody></tbody>';
+    for (const r of submitted) {
+      const tr = document.createElement('tr');
+      for (const [v, pill] of [[r.ref], [r.title], ['New request', true]]) {
+        const td = document.createElement('td');
+        if (pill) { const s = document.createElement('span'); s.className = 'pill'; s.textContent = v; td.append(s); } else td.textContent = v;
+        tr.append(td);
+      }
+      t.tBodies[0].append(tr);
+    }
+    box.append(t);
+  }
+  document.title = 'My requests: ' + BASE_TITLE;
+  show('mine'); $('h-mine').focus();
+}
+
+/* Prototype state shortcuts */
+function fillSample() {
+  $('title').value = 'Automate room booking confirmations';
+  $('dept').value = 'Estates and Facilities';
+  $('process').value = 'Each morning I copy new room bookings from the booking spreadsheet into individual confirmation emails, then mark each row as sent.';
+  $('hours').value = '8';
+  $('benefit').value = 'Efficiency';
+  setSwitch('gdpr', true);
+}
+document.querySelectorAll('.proto button').forEach(b => b.addEventListener('click', () => {
+  const s = b.dataset.s;
+  if (s === 'mine') { if (!submitted.length) { show('form'); resetForm(); fillSample(); form.requestSubmit(); } showMine(); return; }
+  show('form'); resetForm();
+  if (s === 'gdpr') { setSwitch('gdpr', true); $('gdpr').focus(); }
+  else if (s === 'errors') { setSwitch('gdpr', true); form.requestSubmit(); }
+  else if (s === 'filled') { fillSample(); $('submit').focus(); }
+  else if (s === 'confirm') { fillSample(); form.requestSubmit(); }
+  else $('title').focus();
+}));
+}
+</script>
+</body>
+</html>
