@@ -20,18 +20,20 @@ Everything is in one file, `index.html` (layout, styles and JavaScript).
 
 ## Versions
 
-Each version is a commit on `main` with a tag, so you can view, download or branch from any of them.
+Every version is a commit in the history of `main`, with its own tag, branch and [Release](https://github.com/MatrixPrime2626/ict-project-management/releases). Each Release has a **Source code (zip)** download of that exact version.
 
-| Tag | What it contains |
-|-----|------------------|
-| `v1.0` | Intake form with real-time validation, GDPR alert, governance banner and confirmation screen |
-| `v2.0` | Saves submitted requests and adds a **My requests** view |
-| `v3.0` | Aligned with Section 1 spec (FR1, FR2, FR6, NFR1, NFR2) and adds the Digital PM opportunity pipeline (FR3, FR4, NFR3, NFR5) |
+| Version | Tag | Branch | What it contains |
+|---------|-----|--------|------------------|
+| 1 | `v1.0` | `version/v1` | Intake form with real-time validation, GDPR alert, governance banner and confirmation screen |
+| 2 | `v2.0` | `version/v2` | Saves submitted requests and adds a **My requests** view |
+| 3 | `v3.0` | `version/v3` | Aligned with Section 1 spec (FR1, FR2, FR6, NFR1, NFR2) and adds the Digital PM opportunity pipeline (FR3, FR4, NFR3, NFR5) |
+
+The `version/*` branches and tags are snapshots: don't commit to them. Start a new branch from one instead.
 
 ### Start new work from an older version
 
 ```bash
-git fetch --tags
+git fetch origin --tags
 git switch -c my-change-from-v1 v1.0   # new branch starting at v1
 # edit index.html, then
 git add index.html
@@ -39,7 +41,7 @@ git commit -m "Describe the change"
 git push -u origin my-change-from-v1
 ```
 
-On GitHub you can do the same without the command line: open the branch menu, choose the **Tags** tab, pick a version, then type a new branch name in the same menu to create a branch from it.
+On GitHub you can do the same without the command line: open the branch menu on the **Code** tab, pick `version/v1` (or the **Tags** tab → `v1.0`), then type a new branch name in the same menu and choose **Create branch … from 'version/v1'**.
 
 Compare two versions: `git diff v1.0 v2.0 -- index.html`, or on GitHub open `/compare/v1.0...v2.0`.
 
