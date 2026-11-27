@@ -27,6 +27,7 @@ Every version is a commit in the history of `main`, with its own tag, branch and
 | 1 | `v1.0` | `version/v1` | Intake form with real-time validation, GDPR alert, governance banner and confirmation screen |
 | 2 | `v2.0` | `version/v2` | Saves submitted requests and adds a **My requests** view |
 | 3 | `v3.0` | `version/v3` | Aligned with Section 1 spec (FR1, FR2, FR6, NFR1, NFR2) and adds the Digital PM opportunity pipeline (FR3, FR4, NFR3, NFR5) |
+| 4 | `v4.0` | `version/v4` | Sprint 2: pipeline filters by keyword, benefit category, directorate and priority tier with Clear filters (CW02F06-20); "Needs information" send-back under the same reference, requester reply in My requests and a 5-day overdue flag (CW02F06-21) |
 
 The `version/*` branches and tags are snapshots: don't commit to them. Start a new branch from one instead.
 

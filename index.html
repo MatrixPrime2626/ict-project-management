@@ -117,7 +117,16 @@ input[type=search]:focus-visible{outline:3px solid var(--blue);outline-offset:0;
 @media(min-width:601px){main{padding-left:32px;padding-right:32px}}
 .board-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px}
 .board-head .lead{max-width:62ch}
-.tools{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) auto auto;gap:12px;align-items:center;margin-bottom:12px}
+.tools{display:grid;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr));gap:12px;align-items:center;margin-bottom:10px}
+.tools2{display:flex;flex-wrap:wrap;gap:6px 20px;align-items:center;margin-bottom:12px}
+.tools2 .count{margin-left:auto}
+.pipe-alert{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;background:var(--warn-bg);border:2px solid var(--yel);border-left-width:8px;border-radius:10px;padding:8px 14px;margin:0 0 12px;color:var(--pur);font-weight:600}
+.ask-box,.waiting{background:var(--warn-bg);border:2px solid var(--yel);border-left-width:8px;border-radius:10px;padding:12px 16px;margin:4px 0 12px;color:var(--ink)}
+.ask-box h3,.waiting strong{display:block;font-size:17px;margin:0 0 4px;color:var(--pur)}
+.ask-box blockquote{margin:6px 0 12px;padding-left:12px;border-left:3px solid var(--vio);font-weight:600}
+.waiting p{margin:4px 0 10px}
+.pill.need{background:#FFF1C7;border-color:var(--yel)}
+tr.ask-row td{border-bottom:1px solid var(--soft);padding-top:0}
 .tools select{border-radius:999px}
 .chk{display:flex;gap:8px;align-items:center;font-weight:500;margin:0;min-height:44px;cursor:pointer;white-space:nowrap}
 .chk input{width:20px;height:20px;accent-color:var(--pur)}
@@ -181,7 +190,7 @@ details.park[open]{padding-bottom:14px}
 .history{list-style:none;margin:8px 0 0;padding:0 0 0 16px;border-left:2px solid var(--yel)}
 .history li{margin:0 0 10px}
 .history time{display:block;color:var(--hint);font-size:13px}
-@media(max-width:900px){.tools{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(max-width:900px){.tools{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.tools>div:first-child{grid-column:1/-1}}
 @media(max-width:600px){
   header.site,.notice{padding-left:16px;padding-right:16px}
   main{padding:20px 16px 24px}
@@ -204,7 +213,7 @@ details.park[open]{padding-bottom:14px}
 <body>
 <a class="skip" href="#main">Skip to main content</a>
 <header class="site">
-  <a class="logo" href="#main" id="home"><span class="mark" aria-hidden="true">AI</span>AI Foundry <span class="tag">UX prototype</span></a>
+  <a class="logo" href="#main" id="home"><span class="mark" aria-hidden="true">AI</span>AI Foundry <span class="tag">UX prototype v4</span></a>
   <div class="hright">
     <div class="role" id="role-wrap" hidden>
       <label for="role">Viewing as</label>
@@ -364,6 +373,7 @@ details.park[open]{padding-bottom:14px}
   <section class="card" id="view-mine" aria-labelledby="h-mine" hidden>
     <h1 id="h-mine" tabindex="-1">My requests</h1>
     <p class="lead">Requests you have submitted in this session and where they are now.</p>
+    <p class="status-msg" id="mine-status" role="status" aria-live="polite"></p>
     <div id="mine"></div>
     <div class="actions"><button type="button" class="btn primary" id="new-from-mine">Submit a new request</button></div>
   </section>
@@ -377,13 +387,22 @@ details.park[open]{padding-bottom:14px}
       </div>
       <button type="button" class="btn secondary" id="refresh">Refresh</button>
     </div>
-    <div class="tools">
-      <div><label class="sr" for="q">Search requests</label><input type="search" id="q" placeholder="Search title, reference or department" autocomplete="off"></div>
+    <!-- FR4 filters (CW02F06-20): keyword, benefit category, directorate, priority tier -->
+    <div class="tools" role="search" aria-label="Filter the pipeline">
+      <div><label class="sr" for="q">Search requests</label><input type="search" id="q" placeholder="Search title, reference, department or owner" autocomplete="off"></div>
       <div><label class="sr" for="cat">Benefit category</label>
         <select id="cat"><option value="">All benefit categories</option><option>Efficiency</option><option>Financial</option><option>Service</option><option>Risk Reduction</option><option>Data</option><option>Strategic</option></select></div>
+      <div><label class="sr" for="dir">Directorate</label><select id="dir"><option value="">All directorates</option></select></div>
+      <div><label class="sr" for="tier">Priority tier</label>
+        <select id="tier"><option value="">All priority tiers</option><option value="High">High priority</option><option value="Medium">Medium priority</option><option value="Low">Low priority</option><option value="none">Not scored yet</option></select></div>
+    </div>
+    <div class="tools2">
       <label class="chk"><input type="checkbox" id="flagged"> Data flags only</label>
+      <label class="chk"><input type="checkbox" id="waiting"> Waiting for requester</label>
+      <button type="button" class="mini" id="clear" hidden>Clear filters</button>
       <p class="count" id="count" aria-live="polite"></p>
     </div>
+    <div class="pipe-alert" id="pipe-alert" hidden><span aria-hidden="true">⚠</span><span id="pa-text"></span><button type="button" class="mini" id="pa-show">Show waiting requests</button></div>
     <p class="pipe-msg" id="pipe-msg" role="status" aria-live="polite"></p>
     <div class="kanban" id="kanban"></div>
     <p class="mode" id="pipe-mode"></p>
@@ -392,7 +411,8 @@ details.park[open]{padding-bottom:14px}
   <aside class="build-note" aria-labelledby="bn-h">
     <h2 id="bn-h">About this page</h2>
     <p>This is the <strong>UX/UI prototype and design reference</strong> for the Digital Front Door. It shows the screens, wording, validation and data alerts the team agreed. It is not the live service.</p>
-    <p>Use <strong>Viewing as</strong> in the header to switch between the Requester journey and the Digital Project Manager workspace (NFR3). On the saved version, only the page owner and Editors get the Digital Project Manager view. The five requests marked as sample data are synthetic.</p>
+    <p>Use <strong>Viewing as</strong> in the header to switch between the Requester journey and the Digital Project Manager workspace (NFR3). On the saved version, only the page owner and Editors get the Digital Project Manager view. The six requests marked as sample data are synthetic.</p>
+    <p><strong>Version 4 (Sprint 2):</strong> the pipeline can be filtered by keyword, benefit category, directorate and priority tier, with Clear filters to restore the full view (CW02F06-20). The Digital Project Manager can send an unclear request back to the requester under the same reference; the requester answers in My requests, and anything waiting 5 days or more is flagged as overdue (CW02F06-21).</p>
     <p>The live build runs inside LSBU's standard Microsoft 365 tenant (NFR1): a Power Apps canvas app writing to the Opportunity_Intake SharePoint list, with Power Automate sending receipts and status alerts. Requester name and email come from Microsoft Entra ID sign-in, so the form does not ask for them.</p>
   </aside>
 </main>
@@ -422,10 +442,22 @@ details.park[open]{padding-bottom:14px}
     <section aria-labelledby="dm-h">
       <h3 id="dm-h">Move this request</h3>
       <p id="move-text"></p>
+      <div class="waiting" id="waiting-box" hidden></div>
       <div class="actions left">
         <button type="button" class="btn secondary" id="d-back"></button>
         <button type="button" class="btn primary" id="d-next"></button>
       </div>
+      <!-- CW02F06-21: send back under the same reference -->
+      <details class="park" id="ask">
+        <summary>Needs information from the requester</summary>
+        <div class="field" style="margin:4px 0 12px">
+          <label for="ask-text">What is missing?</label>
+          <span class="hint" id="ask-hint">The requester sees this in My requests. The request keeps its reference, stage and history.</span>
+          <textarea id="ask-text" aria-describedby="ask-hint ask-err" style="min-height:88px"></textarea>
+          <p class="err" id="ask-err" hidden></p>
+        </div>
+        <button type="button" class="btn secondary" id="d-ask">Send back to requester</button>
+      </details>
       <details class="park" id="park">
         <summary>Defer or reject</summary>
         <fieldset style="margin:0">
@@ -466,6 +498,9 @@ details.park[open]{padding-bottom:14px}
     <button type="button" data-s="mine">My requests</button>
     <button type="button" data-s="pipe" data-dpm hidden>DPM pipeline</button>
     <button type="button" data-s="triage" data-dpm hidden>Triage panel</button>
+    <button type="button" data-s="filter" data-dpm hidden>Filtered pipeline</button>
+    <button type="button" data-s="ask" data-dpm hidden>Needs information (DPM)</button>
+    <button type="button" data-s="reply">Needs information (requester)</button>
   </div>
 </details>
 
@@ -476,7 +511,7 @@ const form = $('form');
 const BASE_TITLE = 'Digital Front Door prototype';
 const TAB = 'tab-' + Math.random().toString(36).slice(2);
 /* Synthetic sample requests (test data only), used in practice mode and seeded into the saved list */
-const SAMPLES = [{"ref": "AIF-2026-001", "num": 1, "title": "Automate invoice processing", "dept": "Finance", "owner": "Test Owner (Accounts Payable Lead)", "workstream": "WS1", "process": "Each week the team opens supplier PDF invoices, types the details into the finance system and checks each one against its purchase order by hand.", "tools": "Outlook, Adobe Acrobat, finance system", "pain": "Typing errors delay supplier payments, and month end regularly needs overtime.", "hours": 10, "benefit": "Efficiency", "gdpr": false, "fin": true, "status": "New Requests", "dpia": "Hold", "createdAt": "2026-10-20T09:12:00Z", "history": [{"at": "2026-10-20T09:12:00Z", "by": "sample", "what": "Submitted"}], "requester": "sample", "sample": true}, {"ref": "AIF-2026-002", "num": 2, "title": "Student admissions chatbot", "dept": "Student Services", "owner": "Test Owner (Admissions Manager)", "workstream": "WS2", "process": "Admissions staff answer the same applicant questions by email and phone, copying answers from a shared FAQ document.", "tools": "Outlook, Teams, shared Word FAQ", "pain": "In peak season replies take days and answers are inconsistent between staff.", "hours": 6, "benefit": "Service", "gdpr": false, "fin": false, "status": "In Delivery", "dpia": "Not required", "createdAt": "2026-10-02T11:30:00Z", "triage": {"sa": 4, "bp": 4, "sv": 3, "cx": 3, "rr": 2, "priority": 68, "tier": "Medium", "at": "2026-10-06T10:05:00Z", "by": "sample"}, "history": [{"at": "2026-10-02T11:30:00Z", "by": "sample", "what": "Submitted"}, {"at": "2026-10-06T10:05:00Z", "by": "sample", "what": "Triage scores saved: 68/100 (Medium)"}, {"at": "2026-10-06T10:06:00Z", "by": "sample", "what": "Moved to Triaged/Backlog"}, {"at": "2026-10-14T15:20:00Z", "by": "sample", "what": "Moved to In Delivery"}], "requester": "sample", "sample": true}, {"ref": "AIF-2026-003", "num": 3, "title": "Predictive maintenance for campus HVAC", "dept": "Estates and Facilities", "owner": "Test Owner (Building Services Manager)", "workstream": "WS1", "process": "Engineers log heating and cooling faults in a spreadsheet after they happen and plan repairs from it each Monday.", "tools": "Excel, building management system exports", "pain": "Breakdowns are found late, so rooms get too hot or cold before anyone knows.", "hours": 4, "benefit": "Risk Reduction", "gdpr": false, "fin": false, "status": "Triaged/Backlog", "dpia": "Not required", "createdAt": "2026-10-09T08:45:00Z", "triage": {"sa": 1, "bp": 3, "sv": 2, "cx": 2, "rr": 3, "priority": 35, "tier": "Low", "at": "2026-10-13T14:00:00Z", "by": "sample"}, "history": [{"at": "2026-10-09T08:45:00Z", "by": "sample", "what": "Submitted"}, {"at": "2026-10-13T14:00:00Z", "by": "sample", "what": "Triage scores saved: 35/100 (Low)"}, {"at": "2026-10-13T14:02:00Z", "by": "sample", "what": "Moved to Triaged/Backlog"}], "requester": "sample", "sample": true}, {"ref": "AIF-2026-004", "num": 4, "title": "Course reading list generator", "dept": "Library and Learning Resources", "owner": "Test Owner (Academic Liaison Librarian)", "workstream": "WS2", "process": "Librarians rebuild each module reading list by hand every term, checking every title against the catalogue.", "tools": "Excel, library catalogue, email", "pain": "Lists go out late and often include books the library does not hold.", "hours": 3, "benefit": "Data", "gdpr": false, "fin": false, "status": "Completed", "dpia": "Not required", "createdAt": "2026-09-15T13:10:00Z", "triage": {"sa": 5, "bp": 3, "sv": 4, "cx": 2, "rr": 1, "priority": 80, "tier": "High", "at": "2026-09-18T09:30:00Z", "by": "sample"}, "history": [{"at": "2026-09-15T13:10:00Z", "by": "sample", "what": "Submitted"}, {"at": "2026-09-18T09:30:00Z", "by": "sample", "what": "Triage scores saved: 80/100 (High)"}, {"at": "2026-09-18T09:31:00Z", "by": "sample", "what": "Moved to Triaged/Backlog"}, {"at": "2026-09-22T10:00:00Z", "by": "sample", "what": "Moved to In Delivery"}, {"at": "2026-11-10T16:45:00Z", "by": "sample", "what": "Moved to Completed"}], "requester": "sample", "sample": true}, {"ref": "AIF-2026-005", "num": 5, "title": "Replace HR starter checklist spreadsheet", "dept": "Human Resources", "owner": "Test Owner (HR Operations Lead)", "workstream": "WS1", "process": "For each new starter, HR copies a checklist spreadsheet, emails tasks to IT and the line manager, and chases each one by hand.", "tools": "Excel, Outlook", "pain": "Tasks get missed, so some new starters arrive without a laptop or system access.", "hours": 5, "benefit": "Efficiency", "gdpr": true, "fin": false, "status": "New Requests", "dpia": "Hold", "createdAt": "2026-11-03T10:20:00Z", "history": [{"at": "2026-11-03T10:20:00Z", "by": "sample", "what": "Submitted"}], "requester": "sample", "sample": true}];
+const SAMPLES = [{"ref": "AIF-2026-001", "num": 1, "title": "Automate invoice processing", "dept": "Finance", "owner": "Test Owner (Accounts Payable Lead)", "workstream": "WS1", "process": "Each week the team opens supplier PDF invoices, types the details into the finance system and checks each one against its purchase order by hand.", "tools": "Outlook, Adobe Acrobat, finance system", "pain": "Typing errors delay supplier payments, and month end regularly needs overtime.", "hours": 10, "benefit": "Efficiency", "gdpr": false, "fin": true, "status": "New Requests", "dpia": "Hold", "createdAt": "2026-10-20T09:12:00Z", "history": [{"at": "2026-10-20T09:12:00Z", "by": "sample", "what": "Submitted"}], "requester": "sample", "sample": true}, {"ref": "AIF-2026-002", "num": 2, "title": "Student admissions chatbot", "dept": "Student Services", "owner": "Test Owner (Admissions Manager)", "workstream": "WS2", "process": "Admissions staff answer the same applicant questions by email and phone, copying answers from a shared FAQ document.", "tools": "Outlook, Teams, shared Word FAQ", "pain": "In peak season replies take days and answers are inconsistent between staff.", "hours": 6, "benefit": "Service", "gdpr": false, "fin": false, "status": "In Delivery", "dpia": "Not required", "createdAt": "2026-10-02T11:30:00Z", "triage": {"sa": 4, "bp": 4, "sv": 3, "cx": 3, "rr": 2, "priority": 68, "tier": "Medium", "at": "2026-10-06T10:05:00Z", "by": "sample"}, "history": [{"at": "2026-10-02T11:30:00Z", "by": "sample", "what": "Submitted"}, {"at": "2026-10-06T10:05:00Z", "by": "sample", "what": "Triage scores saved: 68/100 (Medium)"}, {"at": "2026-10-06T10:06:00Z", "by": "sample", "what": "Moved to Triaged/Backlog"}, {"at": "2026-10-14T15:20:00Z", "by": "sample", "what": "Moved to In Delivery"}], "requester": "sample", "sample": true}, {"ref": "AIF-2026-003", "num": 3, "title": "Predictive maintenance for campus HVAC", "dept": "Estates and Facilities", "owner": "Test Owner (Building Services Manager)", "workstream": "WS1", "process": "Engineers log heating and cooling faults in a spreadsheet after they happen and plan repairs from it each Monday.", "tools": "Excel, building management system exports", "pain": "Breakdowns are found late, so rooms get too hot or cold before anyone knows.", "hours": 4, "benefit": "Risk Reduction", "gdpr": false, "fin": false, "status": "Triaged/Backlog", "dpia": "Not required", "createdAt": "2026-10-09T08:45:00Z", "triage": {"sa": 1, "bp": 3, "sv": 2, "cx": 2, "rr": 3, "priority": 35, "tier": "Low", "at": "2026-10-13T14:00:00Z", "by": "sample"}, "history": [{"at": "2026-10-09T08:45:00Z", "by": "sample", "what": "Submitted"}, {"at": "2026-10-13T14:00:00Z", "by": "sample", "what": "Triage scores saved: 35/100 (Low)"}, {"at": "2026-10-13T14:02:00Z", "by": "sample", "what": "Moved to Triaged/Backlog"}], "requester": "sample", "sample": true}, {"ref": "AIF-2026-004", "num": 4, "title": "Course reading list generator", "dept": "Library and Learning Resources", "owner": "Test Owner (Academic Liaison Librarian)", "workstream": "WS2", "process": "Librarians rebuild each module reading list by hand every term, checking every title against the catalogue.", "tools": "Excel, library catalogue, email", "pain": "Lists go out late and often include books the library does not hold.", "hours": 3, "benefit": "Data", "gdpr": false, "fin": false, "status": "Completed", "dpia": "Not required", "createdAt": "2026-09-15T13:10:00Z", "triage": {"sa": 5, "bp": 3, "sv": 4, "cx": 2, "rr": 1, "priority": 80, "tier": "High", "at": "2026-09-18T09:30:00Z", "by": "sample"}, "history": [{"at": "2026-09-15T13:10:00Z", "by": "sample", "what": "Submitted"}, {"at": "2026-09-18T09:30:00Z", "by": "sample", "what": "Triage scores saved: 80/100 (High)"}, {"at": "2026-09-18T09:31:00Z", "by": "sample", "what": "Moved to Triaged/Backlog"}, {"at": "2026-09-22T10:00:00Z", "by": "sample", "what": "Moved to In Delivery"}, {"at": "2026-11-10T16:45:00Z", "by": "sample", "what": "Moved to Completed"}], "requester": "sample", "sample": true}, {"ref": "AIF-2026-005", "num": 5, "title": "Replace HR starter checklist spreadsheet", "dept": "Human Resources", "owner": "Test Owner (HR Operations Lead)", "workstream": "WS1", "process": "For each new starter, HR copies a checklist spreadsheet, emails tasks to IT and the line manager, and chases each one by hand.", "tools": "Excel, Outlook", "pain": "Tasks get missed, so some new starters arrive without a laptop or system access.", "hours": 5, "benefit": "Efficiency", "gdpr": true, "fin": false, "status": "New Requests", "dpia": "Hold", "createdAt": "2026-11-03T10:20:00Z", "history": [{"at": "2026-11-03T10:20:00Z", "by": "sample", "what": "Submitted"}], "requester": "sample", "sample": true}, {"ref": "AIF-2026-006", "num": 6, "title": "Automate timetable change notices", "dept": "Registry", "owner": "Test Owner (Timetabling Manager)", "workstream": "WS1", "process": "When a class moves room or time, the timetabling team emails each affected student group and lecturer by hand.", "tools": "Excel, Outlook, timetabling system", "pain": "Notices go out late.", "hours": 3, "benefit": "Service", "gdpr": false, "fin": false, "status": "New Requests", "dpia": "Not required", "createdAt": "2026-11-13T09:40:00Z", "info": {"state": "Waiting", "ask": "How many timetable changes do you handle in a typical week, and which system are the change notices sent from?", "askedAt": "2026-11-16T10:00:00Z", "by": "sample"}, "history": [{"at": "2026-11-13T09:40:00Z", "by": "sample", "what": "Submitted"}, {"at": "2026-11-16T10:00:00Z", "by": "sample", "what": "Sent back for information: How many timetable changes do you handle in a typical week, and which system are the change notices sent from?"}], "requester": "sample", "mine": true, "sample": true}];
 const clone = o => JSON.parse(JSON.stringify(o));
 const local = SAMPLES.map(clone);   // used when the page cannot save (downloaded copy, signed out, view-only)
 let localNext = SAMPLES.length + 1;
@@ -714,17 +749,43 @@ $('track').addEventListener('click', showMine);
 
 /* ---------- My requests ---------- */
 function msg(text) { const p = document.createElement('p'); p.className = 'empty'; p.textContent = text; return p; }
-async function showMine() {
+/* Practice mode also lists one sample request "submitted by you" so the Needs information reply can be tried */
+const localMine = () => local.filter(r => r.requester !== 'sample' || (r.mine && !canSave));
+let mineList = [];
+function askBox(r) {
+  const box = el('div', 'ask-box'), id = 'reply-' + r.ref;
+  box.append(el('h3', '', 'The Digital Project Manager needs more information'),
+    el('p', 'k-meta', `Asked ${fmtDate(r.info.askedAt)}. Your request keeps reference ${r.ref} and its place in the queue.`),
+    el('blockquote', '', r.info.ask));
+  const lab = el('label', '', 'Your reply'); lab.htmlFor = id;
+  const ta = el('textarea'); ta.id = id; ta.style.minHeight = '88px'; ta.setAttribute('aria-describedby', id + '-err');
+  const err = el('p', 'err'); err.id = id + '-err'; err.hidden = true;
+  const b = el('button', 'btn primary', 'Send reply'); b.type = 'button'; b.dataset.reply = r.ref; b.style.marginTop = '12px';
+  box.append(lab, ta, err, b);
+  return box;
+}
+$('mine').addEventListener('click', async e => {
+  const b = e.target.closest('[data-reply]'); if (!b) return;
+  const r = mineList.find(x => x.ref === b.dataset.reply); if (!r) return;
+  const ta = $('reply-' + r.ref), err = $('reply-' + r.ref + '-err'), reply = ta.value.trim();
+  const fail = m => { err.textContent = ''; err.append(el('span', '', '⚠ '), m); err.hidden = false; ta.setAttribute('aria-invalid', 'true'); ta.focus(); };
+  if (reply.length < 10) { fail('Enter your reply (at least 10 characters)'); return; }
+  const info = { ...r.info, state: 'Answered', reply, repliedAt: new Date().toISOString() };
+  if (!(await change(r, { info }, `Requester replied: ${reply}`, 'requester'))) { fail('Your reply could not be sent. Check your connection, then try again.'); return; }
+  await showMine(`Reply sent. ${r.ref} is back with the Digital Project Manager.`);
+});
+async function showMine(note) {
   const box = $('mine'); box.textContent = '';
+  $('mine-status').textContent = typeof note === 'string' ? note : '';
   document.title = 'My requests: ' + BASE_TITLE;
   show('mine'); $('h-mine').focus();
   setRoleValue('requester');
-  let list = local.filter(r => r.requester !== 'sample');
+  let list = localMine();
   if (canSave && uid) {
     box.append(msg('Loading your requests…'));
     try {
       const snap = await withTimeout(db.collection('requests').where('requester', '==', uid).get());
-      list = snap.docs.map(d => d.data()).concat(local.filter(r => r.requester !== 'sample'));
+      list = snap.docs.map(d => d.data()).concat(localMine());
     } catch (e) {
       box.textContent = '';
       box.append(msg('Your saved requests cannot be reached right now. Try again in a moment.'));
@@ -732,18 +793,23 @@ async function showMine() {
     }
   }
   list.sort((a, b) => (Number(b.num) || 0) - (Number(a.num) || 0) || String(b.createdAt).localeCompare(String(a.createdAt)));
+  mineList = list;
   box.textContent = '';
   if (!list.length) { box.append(msg('You have not submitted any requests yet.')); return; }
   const t = document.createElement('table');
   t.innerHTML = '<caption class="sr">Your submitted requests</caption><thead><tr><th scope="col">Reference</th><th scope="col">Title</th><th scope="col">Status</th></tr></thead><tbody></tbody>';
   for (const r of list) {
-    const tr = document.createElement('tr');
-    for (const [v, pill] of [[r.ref], [r.title], [r.status || 'New Requests', true]]) {
-      const td = document.createElement('td');
-      if (pill) { const s = document.createElement('span'); s.className = 'pill'; s.textContent = String(v); td.append(s); } else td.textContent = String(v);
-      tr.append(td);
-    }
+    const tr = document.createElement('tr'), waiting = isWaiting(r);
+    const tdTitle = el('td', '', r.title);
+    if (r.sample) tdTitle.append(' ', el('span', 'badge park', 'Sample data'));
+    const tdStatus = el('td');
+    tdStatus.append(el('span', 'pill' + (waiting ? ' need' : ''), waiting ? 'Needs information' : (r.status || 'New Requests')));
+    tr.append(el('td', '', r.ref), tdTitle, tdStatus);
     t.tBodies[0].append(tr);
+    if (waiting) {
+      const row = el('tr', 'ask-row'), td = el('td'); td.colSpan = 3;
+      td.append(askBox(r)); row.append(td); t.tBodies[0].append(row);
+    }
   }
   box.append(t);
 }
@@ -769,6 +835,14 @@ $('role').addEventListener('change', () => setRole($('role').value));
 /* ---------- Digital PM pipeline (FR3, FR4, NFR5) ---------- */
 const STAGES = ['New Requests', 'Triaged/Backlog', 'In Delivery', 'Completed'];
 const PARKED = ['Deferred', 'Rejected'];
+/* CW02F06-21: "Needs information" keeps the request in its stage under the same reference */
+const WAIT_DAYS = 5;   // requests left waiting this many days or more are flagged to the DPM
+const ASKABLE = ['New Requests', 'Triaged/Backlog'];
+const isWaiting = r => !!(r && r.info && r.info.state === 'Waiting');
+const isAnswered = r => !!(r && r.info && r.info.state === 'Answered');
+const waitDays = r => Math.max(0, Math.floor((Date.now() - Date.parse(r.info.askedAt)) / 864e5));
+const overdue = r => isWaiting(r) && waitDays(r) >= WAIT_DAYS;
+const closeInfo = r => isWaiting(r) || isAnswered(r) ? { info: { ...r.info, state: 'Closed' } } : {};
 const COLS = [['New Requests', ['New Requests']], ['Triaged/Backlog', ['Triaged/Backlog']], ['In Delivery', ['In Delivery']],
   ['Completed', ['Completed']], ['Deferred/Rejected', PARKED]];
 const CRIT = [
@@ -815,6 +889,9 @@ async function showPipeline() {
 
 function badges(r) {
   const b = el('div', 'badges');
+  if (isWaiting(r)) b.append(el('span', 'badge hold', 'Waiting for requester'));
+  if (overdue(r)) b.append(el('span', 'badge flag', `Overdue · ${waitDays(r)} days`));
+  if (isAnswered(r)) b.append(el('span', 'badge ok', 'Requester replied'));
   if (r.gdpr) b.append(el('span', 'badge flag', 'Personal data (GDPR)'));
   if (r.fin) b.append(el('span', 'badge flag', 'Financial data'));
   if (r.dpia === 'Hold') b.append(el('span', 'badge hold', 'DPIA hold'));
@@ -834,6 +911,8 @@ function targetOf(r, dir) {
   return dir === 'next' ? STAGES[i + 1] || '' : STAGES[i - 1] || '';
 }
 function blocker(r, to) {
+  if (isWaiting(r) && STAGES.indexOf(to) > STAGES.indexOf(r.status))
+    return `${r.ref} is waiting for information from the requester. Wait for their reply, or withdraw the question, before moving it on.`;
   if (to === 'Triaged/Backlog' && r.status === 'New Requests' && !r.triage)
     return `${r.ref} needs triage scores before it can move to Triaged/Backlog.`;
   if (to === 'In Delivery' && r.dpia === 'Hold')
@@ -869,11 +948,33 @@ function card(r) {
   }
   return a;
 }
+/* FR4 filters (CW02F06-20) */
+const FILTERS = ['q', 'cat', 'dir', 'tier', 'flagged', 'waiting'];
+const tierKey = r => r.triage ? r.triage.tier : 'none';
+function readFilters() {
+  return { q: $('q').value.trim().toLowerCase(), cat: $('cat').value, dir: $('dir').value, tier: $('tier').value,
+    fl: $('flagged').checked, wt: $('waiting').checked };
+}
+function matches(r, f) {
+  return (!f.cat || r.benefit === f.cat) && (!f.dir || r.dept === f.dir) && (!f.tier || tierKey(r) === f.tier) &&
+    (!f.fl || r.gdpr || r.fin) && (!f.wt || isWaiting(r)) &&
+    (!f.q || [r.ref, r.title, r.dept, r.owner].join(' ').toLowerCase().includes(f.q));
+}
+function resetFilters() {
+  $('q').value = ''; $('cat').value = ''; $('dir').value = ''; $('tier').value = '';
+  $('flagged').checked = false; $('waiting').checked = false;
+}
+(function fillDirectorates() {
+  for (const o of $('dept').options) if (o.value) $('dir').append(new Option(o.value, o.value));
+})();
 function renderBoard() {
-  const q = $('q').value.trim().toLowerCase(), cat = $('cat').value, fl = $('flagged').checked;
-  const vis = cache.filter(r => (!cat || r.benefit === cat) && (!fl || r.gdpr || r.fin) &&
-    (!q || [r.ref, r.title, r.dept].join(' ').toLowerCase().includes(q)));
-  $('count').textContent = `${vis.length} of ${cache.length} requests`;
+  const f = readFilters(), active = !!(f.q || f.cat || f.dir || f.tier || f.fl || f.wt);
+  const vis = cache.filter(r => matches(r, f));
+  $('count').textContent = active ? `Showing ${vis.length} of ${cache.length} requests` : `${cache.length} requests`;
+  $('clear').hidden = !active;
+  const od = cache.filter(overdue).length;
+  $('pipe-alert').hidden = !od;
+  $('pa-text').textContent = od ? `${od} request${od === 1 ? ' has' : 's have'} waited for the requester for ${WAIT_DAYS} days or more.` : '';
   const k = $('kanban'); k.textContent = '';
   COLS.forEach(([name, states], i) => {
     const items = vis.filter(r => states.includes(r.status || 'New Requests'))
@@ -881,12 +982,18 @@ function renderBoard() {
     const col = el('section', 'kcol'); col.setAttribute('aria-labelledby', 'col-' + i);
     const h = el('h2'); h.id = 'col-' + i; h.append(el('span', 'sr', 'Column: '), name, el('span', '', items.length)); col.append(h);
     const list = el('div', 'klist');
-    if (!items.length) list.append(el('p', 'k-empty', 'Nothing here'));
+    if (!items.length) list.append(el('p', 'k-empty', active ? 'No matching requests' : 'Nothing here'));
     items.forEach(r => list.append(card(r)));
     col.append(list); k.append(col);
   });
 }
-['q', 'cat', 'flagged'].forEach(id => $(id).addEventListener(id === 'q' ? 'input' : 'change', renderBoard));
+FILTERS.forEach(id => $(id).addEventListener(id === 'q' ? 'input' : 'change', renderBoard));
+$('clear').addEventListener('click', () => {
+  resetFilters(); renderBoard();
+  $('pipe-msg').textContent = 'Filters cleared. Showing all requests.';
+  $('q').focus();
+});
+$('pa-show').addEventListener('click', () => { $('waiting').checked = true; renderBoard(); $('waiting').focus(); });
 $('refresh').addEventListener('click', async () => { await loadPipeline(); renderBoard(); if (canSave && !$('pipe-msg').textContent) $('pipe-msg').textContent = 'Pipeline refreshed.'; });
 $('kanban').addEventListener('click', e => {
   const o = e.target.closest('[data-open]');
@@ -896,10 +1003,11 @@ $('kanban').addEventListener('click', e => {
 });
 
 function say(text) { if ($('drawer').open) $('d-msg').textContent = text; else $('pipe-msg').textContent = text; }
-async function change(r, patch, what) {
+async function change(r, patch, what, actor) {
   if (writing) return false;
   writing = true;
   const entry = { at: new Date().toISOString(), by: uid || 'practice', what };
+  if (actor) entry.role = actor;
   const next = { ...patch, history: [...(r.history || []), entry], updatedAt: entry.at };
   try {
     if (canSave) await withTimeout(db.collection('requests').doc(r.ref).update(next));
@@ -926,7 +1034,7 @@ async function doMove(ref, dir) {
     else { $('pipe-msg').textContent = why; openDrawer(ref, why); }
     return;
   }
-  const ok = await change(r, { status: to }, (dir === 'reopen' ? 'Reopened to ' : 'Moved to ') + to);
+  const ok = await change(r, { status: to, ...(isAnswered(r) ? closeInfo(r) : {}) }, (dir === 'reopen' ? 'Reopened to ' : 'Moved to ') + to);
   if (!ok) return;
   say(`${r.ref} moved to ${to}.`);
   renderBoard();
@@ -971,6 +1079,7 @@ function renderDrawer(resetSliders) {
   const rows = [['Business owner', r.owner], ['Route', r.workstream === 'WS2' ? 'Hackathon workshop (Workstream 2)' : 'Single staff request (Workstream 1)'],
     ['Current process', r.process], ['Current tools used', r.tools], ['Pain points', r.pain], ['Expected benefit', r.benefit],
     ['Staff hours saved per week', r.hours], ['Estimated annual saving (FR6)', `${money(est(r))} (hours × 52 × £25)`]];
+  if (r.info && r.info.reply) rows.push(['Requester’s latest reply', `${r.info.reply} (${fmtDate(r.info.repliedAt)})`]);
   const dl = $('d-details'); dl.textContent = '';
   for (const [k, v] of rows) dl.append(el('dt', '', k), el('dd', '', v == null || v === '' ? 'Not given' : v));
   if (resetSliders) CRIT.forEach(([k]) => { $('s-' + k).value = r.triage ? r.triage[k] : 3; });
@@ -987,10 +1096,19 @@ function renderDrawer(resetSliders) {
   $('d-back').hidden = !back; $('d-back').textContent = back ? 'Back to ' + back : '';
   $('d-next').hidden = !next; $('d-next').textContent = next ? (parked ? 'Reopen to ' : 'Move to ') + next : '';
   $('park').hidden = parked || r.status === 'Completed';
+  const waiting = isWaiting(r), wb = $('waiting-box');
+  wb.textContent = ''; wb.hidden = !waiting;
+  if (waiting) {
+    const d = waitDays(r);
+    wb.append(el('strong', '', `Waiting for the requester · ${d} day${d === 1 ? '' : 's'}${overdue(r) ? ' (overdue)' : ''}`),
+      el('p', '', `Asked ${fmtDate(r.info.askedAt)}: ${r.info.ask}`));
+    const u = el('button', 'btn secondary', 'Withdraw the question'); u.type = 'button'; u.id = 'd-unask'; wb.append(u);
+  }
+  $('ask').hidden = waiting || !ASKABLE.includes(r.status);
   const ol = $('history'); ol.textContent = '';
   for (const h of (r.history || []).slice().reverse()) {
     const li = el('li'), t = el('time', '', fmtTime(h.at)); t.dateTime = h.at;
-    li.append(t, `${h.what} · ${who(h.by)}`); ol.append(li);
+    li.append(t, `${h.what} · ${h.role === 'requester' ? 'Requester' : who(h.by)}`); ol.append(li);
   }
   if (!ol.children.length) ol.append(el('li', '', 'No changes recorded yet.'));
 }
@@ -999,7 +1117,31 @@ $('drawer').addEventListener('click', e => { if (e.target === $('drawer')) $('dr
 $('drawer').addEventListener('close', () => {
   const ref = cur && cur.ref; cur = null;
   $('rationale').value = ''; setRat(''); $('park').open = false;
+  $('ask-text').value = ''; setAsk(''); $('ask').open = false;
   renderBoard(); if (ref) refocus(ref, '[data-open]');
+});
+function setAsk(m) {
+  const e = $('ask-err'), t = $('ask-text');
+  if (m) { e.textContent = ''; e.append(el('span', '', '⚠ '), m); e.hidden = false; t.setAttribute('aria-invalid', 'true'); }
+  else { e.hidden = true; e.textContent = ''; t.removeAttribute('aria-invalid'); }
+}
+$('d-ask').addEventListener('click', async () => {
+  const ask = $('ask-text').value.trim();
+  if (ask.length < 10) { setAsk('Enter what is missing (at least 10 characters)'); $('ask-text').focus(); return; }
+  setAsk('');
+  const info = { state: 'Waiting', ask, askedAt: new Date().toISOString(), by: uid || 'practice' };
+  if (!(await change(cur, { info }, `Sent back for information: ${ask}`))) return;
+  $('ask-text').value = ''; $('ask').open = false;
+  renderDrawer(false); renderBoard();
+  $('d-msg').textContent = `${cur.ref} sent back to the requester. It keeps its reference and stays in ${cur.status}.`;
+  $('d-close').focus();
+});
+$('waiting-box').addEventListener('click', async e => {
+  if (!e.target.closest('#d-unask')) return;
+  if (!(await change(cur, closeInfo(cur), 'Request for information withdrawn'))) return;
+  renderDrawer(false); renderBoard();
+  $('d-msg').textContent = `Question withdrawn. ${cur.ref} can move on again.`;
+  $('d-close').focus();
 });
 $('save-scores').addEventListener('click', async () => {
   const s = readScores(), p = priority(s), t = tierOf(p);
@@ -1026,7 +1168,7 @@ $('d-park').addEventListener('click', async () => {
   const why = $('rationale').value.trim(), val = document.querySelector('input[name=park]:checked').value;
   if (why.length < 10) { setRat('Enter the reason for this decision (at least 10 characters)'); $('rationale').focus(); return; }
   setRat('');
-  if (!(await change(cur, { status: val, rationale: why }, `${val}: ${why}`))) return;
+  if (!(await change(cur, { status: val, rationale: why, ...closeInfo(cur) }, `${val}: ${why}`))) return;
   $('rationale').value = ''; $('park').open = false;
   renderDrawer(false); renderBoard();
   $('d-msg').textContent = `${cur.ref} marked as ${val}.`;
@@ -1048,8 +1190,19 @@ function fillSample() {
 document.querySelectorAll('.proto button').forEach(b => b.addEventListener('click', async () => {
   const s = b.dataset.s;
   if ($('drawer').open) $('drawer').close();
-  if (s === 'mine') { showMine(); return; }
-  if (s === 'pipe') { await setRole('dpm'); return; }
+  if (s === 'mine' || s === 'reply') { showMine(); return; }
+  if (s === 'pipe') { resetFilters(); await setRole('dpm'); return; }
+  if (s === 'filter') {
+    resetFilters(); await setRole('dpm');
+    $('cat').value = 'Efficiency'; $('tier').value = 'none'; renderBoard(); $('clear').focus();
+    return;
+  }
+  if (s === 'ask') {
+    resetFilters(); await setRole('dpm');
+    const r = cache.find(x => ASKABLE.includes(x.status) && !isWaiting(x));
+    if (r) { openDrawer(r.ref); $('ask').open = true; $('ask-text').focus(); $('ask').scrollIntoView({ block: 'center' }); }
+    return;
+  }
   if (s === 'triage') {
     await setRole('dpm');
     const r = cache.find(x => x.status === 'New Requests') || cache[0];
